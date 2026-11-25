@@ -164,4 +164,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except BaseException:
+        import traceback
+        programa = pasta_do_programa()
+        log(pasta_de_dados(programa), "[erro fatal]\n" + traceback.format_exc())
+        raise

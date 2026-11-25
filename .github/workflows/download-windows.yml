@@ -41,9 +41,11 @@ jobs:
           Copy-Item dist/Pestinha.exe teste/
           '{"configurado": true, "ativo": true}' | Set-Content teste/memory/permissions.json
           $p = Start-Process -FilePath teste/Pestinha.exe -ArgumentList "--direto","--sair-em","20" -PassThru
-          if (-not $p.WaitForExit(120000)) { $p.Kill(); throw "o Pestinha.exe não fechou sozinho" }
-          Get-ChildItem -Recurse teste/memory | Select-Object FullName | Format-Table -AutoSize
-          Get-Content teste/memory/logs/*.log
+          $fechou = $p.WaitForExit(120000)
+          if (-not $fechou) { $p.Kill() }
+          Get-ChildItem -Recurse teste/memory -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "\\codigo\\.+\\" } | ForEach-Object { $_.FullName }
+          Get-ChildItem teste/memory/logs/*.log -ErrorAction SilentlyContinue | ForEach-Object { "=== $($_.Name)"; Get-Content $_ }
+          if (-not $fechou) { throw "o Pestinha.exe não fechou sozinho" }
           if (-not (Select-String -Path teste/memory/logs/pestinha.log -Pattern "plataforma" -Quiet)) { throw "o programa não abriu" }
           if (Select-String -Path teste/memory/logs/pestinha.log -Pattern "\[erro\]" -Quiet) { throw "o programa abriu com erro" }
           if (-not (Test-Path teste/memory/codigo/atual.json)) { Write-Warning "não baixou atualização (pode ser a mesma versão)" }
