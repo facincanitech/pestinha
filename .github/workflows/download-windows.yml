@@ -27,10 +27,12 @@ jobs:
         shell: bash
         run: |
           HIDDEN="$(python ferramentas/importacoes.py)"
+          R="$(python -c 'import os; print(os.getcwd())')"        # caminho nativo (D:\a\... no Windows)
+          S="$(python -c 'import os; print(os.pathsep)')"         # ';' no Windows, ':' no Mac/Linux
           python -m PyInstaller --noconfirm --onefile --windowed $HIDDEN \
-            --add-data "$PWD/pestinha:embutido/pestinha" --add-data "$PWD/main.py:embutido" \
-            --add-data "$PWD/pets:embutido/pets" --add-data "$PWD/assets:embutido/assets" \
-            --add-data "$PWD/atualizacao.json:embutido" \
+            --add-data "$R/pestinha${S}embutido/pestinha" --add-data "$R/main.py${S}embutido" \
+            --add-data "$R/pets${S}embutido/pets" --add-data "$R/assets${S}embutido/assets" \
+            --add-data "$R/atualizacao.json${S}embutido" \
             --name Pestinha --distpath dist --workpath build/work --specpath build lancador.py
       - name: Testar o .exe (abre, atualiza sozinho e fecha)
         shell: pwsh
