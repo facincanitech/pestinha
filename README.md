@@ -5,7 +5,7 @@ Esta é uma **versão modificada** do [Pestinha original](https://github.com/mil
 distribuída sob a mesma licença, a **GNU GPL v3 ou posterior** (veja [LICENSE](LICENSE)).
 
 **Site, ranking e museu:** https://facincanitech.github.io/pestinha/
-**Baixar para Windows:** [última versão](https://github.com/facincanitech/pestinha/releases/latest)
+**Baixar para Windows:** [Pestinha-Windows.zip](https://facincanitech.github.io/pestinha/downloads/Pestinha-Windows.zip) (atualiza sozinho ao abrir)
 (ou rode pelo código: dois cliques em `Iniciar Pestinha.bat`, precisa do Python 3.11+)
 
 ## O que esta versão acrescenta

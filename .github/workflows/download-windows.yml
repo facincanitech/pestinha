@@ -1,0 +1,58 @@
+name: download para Windows
+# Gera o Pestinha.exe (o lançador), testa ele num Windows de verdade e publica o zip no site:
+# https://facincanitech.github.io/pestinha/downloads/Pestinha-Windows.zip
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["lancador.py", "requirements.txt", "ferramentas/importacoes.py", ".github/workflows/download-windows.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: download-windows
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt pyinstaller==6.22.3
+      - name: Gerar o Pestinha.exe
+        shell: bash
+        run: |
+          HIDDEN="$(python ferramentas/importacoes.py)"
+          python -m PyInstaller --noconfirm --onefile --windowed $HIDDEN \
+            --add-data "$PWD/pestinha:embutido/pestinha" --add-data "$PWD/main.py:embutido" \
+            --add-data "$PWD/pets:embutido/pets" --add-data "$PWD/assets:embutido/assets" \
+            --add-data "$PWD/atualizacao.json:embutido" \
+            --name Pestinha --distpath dist --workpath build/work --specpath build lancador.py
+      - name: Testar o .exe (abre, atualiza sozinho e fecha)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force teste/memory | Out-Null
+          Copy-Item dist/Pestinha.exe teste/
+          '{"configurado": true, "ativo": true}' | Set-Content teste/memory/permissions.json
+          $p = Start-Process -FilePath teste/Pestinha.exe -ArgumentList "--direto","--sair-em","20" -PassThru
+          if (-not $p.WaitForExit(120000)) { $p.Kill(); throw "o Pestinha.exe não fechou sozinho" }
+          Get-ChildItem -Recurse teste/memory | Select-Object FullName | Format-Table -AutoSize
+          Get-Content teste/memory/logs/*.log
+          if (-not (Select-String -Path teste/memory/logs/pestinha.log -Pattern "plataforma" -Quiet)) { throw "o programa não abriu" }
+          if (Select-String -Path teste/memory/logs/pestinha.log -Pattern "\[erro\]" -Quiet) { throw "o programa abriu com erro" }
+          if (-not (Test-Path teste/memory/codigo/atual.json)) { Write-Warning "não baixou atualização (pode ser a mesma versão)" }
+      - name: Publicar no site
+        shell: bash
+        run: |
+          mkdir -p downloads
+          python -c "import zipfile; z=zipfile.ZipFile('downloads/Pestinha-Windows.zip','w',zipfile.ZIP_DEFLATED); z.write('dist/Pestinha.exe','Pestinha.exe'); z.close()"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/Pestinha-Windows.zip
+          git commit -m "Pestinha.exe novo no site (gerado e testado pelo GitHub)" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
