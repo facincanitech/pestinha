@@ -18,29 +18,52 @@ from datetime import date, timedelta
 
 from ..store import read_json, write_json
 
+# categoria: (figura da categoria, [(palavra, figura), ...])
 CATEGORIAS = {
-    "Casa": ["cama", "janela", "sofá", "geladeira", "lustre", "tapete", "cortina"],
-    "Cozinha": ["panela", "fogão", "colher", "frigideira", "pia", "liquidificador"],
-    "Frutas": ["banana", "uva", "abacaxi", "morango", "melancia", "caju", "goiaba"],
-    "Bichos": ["cachorro", "gato", "cavalo", "galinha", "tartaruga", "coelho"],
-    "Mar": ["baleia", "tubarão", "polvo", "onda", "coral", "maré"],
-    "Espaço": ["planeta", "estrela", "cometa", "foguete", "lua", "galáxia"],
-    "Música": ["violão", "bateria", "samba", "refrão", "microfone", "partitura"],
-    "Futebol": ["gol", "goleiro", "escanteio", "pênalti", "chuteira", "juiz"],
-    "Computador": ["teclado", "mouse", "monitor", "processador", "memória", "placa-mãe"],
-    "Escola": ["caderno", "lápis", "professor", "recreio", "lousa", "mochila"],
-    "Clima": ["chuva", "trovão", "neblina", "granizo", "vento", "garoa"],
-    "Corpo": ["joelho", "cotovelo", "orelha", "umbigo", "tornozelo", "pulmão"],
-    "Roupas": ["camiseta", "bermuda", "jaqueta", "meia", "boné", "chinelo"],
-    "Cores": ["azul", "amarelo", "vermelho", "roxo", "laranja", "verde"],
-    "Profissões": ["médico", "pedreiro", "padeiro", "bombeiro", "piloto", "advogado"],
-    "Transporte": ["ônibus", "bicicleta", "metrô", "avião", "barco", "trem"],
-    "Festa": ["bolo", "balão", "confete", "brigadeiro", "presente", "vela"],
-    "Jogos": ["xadrez", "damas", "dominó", "baralho", "videogame", "peteca"],
-    "Ferramentas": ["martelo", "serrote", "alicate", "chave de fenda", "furadeira", "trena"],
-    "Sentimentos": ["saudade", "alegria", "medo", "raiva", "ciúme", "orgulho"],
-    "Brasil": ["feijoada", "capoeira", "carnaval", "açaí", "pão de queijo", "frevo"],
-    "Pestinha": ["casinha", "Mapple", "moedinha", "chapéu", "notebook", "bolinha"],
+    "Casa": ("🏠", [("cama", "🛏️"), ("janela", "🪟"), ("sofá", "🛋️"), ("porta", "🚪"), ("chuveiro", "🚿"),
+                   ("vaso sanitário", "🚽"), ("espelho", "🪞"), ("cadeira", "🪑")]),
+    "Cozinha": ("🍳", [("panela", "🍲"), ("garfo", "🍴"), ("colher", "🥄"), ("faca", "🔪"), ("xícara", "☕"),
+                      ("prato", "🍽️"), ("tigela", "🥣"), ("garrafa", "🍾")]),
+    "Frutas": ("🍎", [("banana", "🍌"), ("uva", "🍇"), ("abacaxi", "🍍"), ("morango", "🍓"), ("melancia", "🍉"),
+                     ("limão", "🍋"), ("pêssego", "🍑"), ("cereja", "🍒")]),
+    "Bichos": ("🐾", [("cachorro", "🐶"), ("gato", "🐱"), ("cavalo", "🐴"), ("galinha", "🐔"), ("tartaruga", "🐢"),
+                     ("coelho", "🐰"), ("porco", "🐷"), ("vaca", "🐮")]),
+    "Mar": ("🌊", [("baleia", "🐋"), ("tubarão", "🦈"), ("polvo", "🐙"), ("peixe", "🐟"), ("caranguejo", "🦀"),
+                  ("concha", "🐚"), ("golfinho", "🐬"), ("lagosta", "🦞")]),
+    "Espaço": ("🌌", [("planeta", "🪐"), ("estrela", "⭐"), ("cometa", "☄️"), ("foguete", "🚀"), ("lua", "🌙"),
+                     ("astronauta", "🧑‍🚀"), ("satélite", "🛰️"), ("disco voador", "🛸")]),
+    "Música": ("🎵", [("violão", "🎸"), ("bateria", "🥁"), ("piano", "🎹"), ("trompete", "🎺"), ("microfone", "🎤"),
+                     ("violino", "🎻"), ("fone", "🎧"), ("saxofone", "🎷")]),
+    "Esportes": ("🏅", [("futebol", "⚽"), ("basquete", "🏀"), ("vôlei", "🏐"), ("tênis", "🎾"), ("boliche", "🎳"),
+                       ("natação", "🏊"), ("ciclismo", "🚴"), ("boxe", "🥊")]),
+    "Computador": ("💻", [("teclado", "⌨️"), ("mouse", "🖱️"), ("monitor", "🖥️"), ("impressora", "🖨️"),
+                         ("disquete", "💾"), ("CD", "💿"), ("bateria do note", "🔋"), ("tomada", "🔌")]),
+    "Escola": ("🏫", [("caderno", "📓"), ("lápis", "✏️"), ("livro", "📖"), ("régua", "📏"), ("mochila", "🎒"),
+                     ("tesoura", "✂️"), ("giz de cera", "🖍️"), ("calculadora", "🧮")]),
+    "Clima": ("⛅", [("chuva", "🌧️"), ("trovão", "⛈️"), ("neblina", "🌫️"), ("neve", "❄️"), ("vento", "🌬️"),
+                    ("arco-íris", "🌈"), ("sol", "☀️"), ("tornado", "🌪️")]),
+    "Corpo": ("🧍", [("olho", "👁️"), ("orelha", "👂"), ("nariz", "👃"), ("boca", "👄"), ("mão", "✋"),
+                    ("pé", "🦶"), ("cérebro", "🧠"), ("dente", "🦷")]),
+    "Roupas": ("👕", [("camiseta", "👕"), ("calça", "👖"), ("vestido", "👗"), ("meia", "🧦"), ("boné", "🧢"),
+                     ("chinelo", "🩴"), ("cachecol", "🧣"), ("luva", "🧤")]),
+    "Profissões": ("💼", [("médico", "🧑‍⚕️"), ("pedreiro", "👷"), ("cozinheiro", "🧑‍🍳"), ("bombeiro", "🧑‍🚒"),
+                         ("piloto", "🧑‍✈️"), ("juiz", "🧑‍⚖️"), ("policial", "👮"), ("fazendeiro", "🧑‍🌾")]),
+    "Transporte": ("🚦", [("ônibus", "🚌"), ("bicicleta", "🚲"), ("metrô", "🚇"), ("avião", "✈️"), ("barco", "⛵"),
+                         ("trem", "🚆"), ("moto", "🏍️"), ("helicóptero", "🚁")]),
+    "Festa": ("🎉", [("bolo", "🎂"), ("balão", "🎈"), ("confete", "🎊"), ("presente", "🎁"), ("vela", "🕯️"),
+                    ("chapéu de festa", "🥳"), ("pirulito", "🍭"), ("fogos", "🎆")]),
+    "Jogos": ("🎲", [("xadrez", "♟️"), ("dado", "🎲"), ("baralho", "🃏"), ("videogame", "🎮"), ("quebra-cabeça", "🧩"),
+                    ("ioiô", "🪀"), ("pipa", "🪁"), ("bola de gude", "🔮")]),
+    "Ferramentas": ("🧰", [("martelo", "🔨"), ("chave inglesa", "🔧"), ("serrote", "🪚"), ("parafuso", "🔩"),
+                          ("machado", "🪓"), ("ímã", "🧲"), ("escada", "🪜"), ("balde", "🪣")]),
+    "Sentimentos": ("💭", [("alegria", "😄"), ("tristeza", "😢"), ("raiva", "😠"), ("medo", "😨"), ("amor", "😍"),
+                          ("sono", "😴"), ("surpresa", "😲"), ("vergonha", "😳")]),
+    "Comida": ("🍽️", [("pizza", "🍕"), ("hambúrguer", "🍔"), ("pão", "🍞"), ("queijo", "🧀"), ("ovo", "🥚"),
+                      ("taco", "🌮"), ("pipoca", "🍿"), ("sorvete", "🍦")]),
+    "Natureza": ("🌳", [("árvore", "🌳"), ("flor", "🌸"), ("cacto", "🌵"), ("cogumelo", "🍄"), ("folha", "🍃"),
+                       ("vulcão", "🌋"), ("montanha", "⛰️"), ("girassol", "🌻")]),
+    "Pestinha": ("👾", [("casinha", "🏡"), ("celular Mapple", "📱"), ("moedinha", "🪙"), ("chapéu", "🤠"),
+                       ("notebook", "💻"), ("bolinha", "🥎"), ("coroa", "👑"), ("desenho", "🖼️")]),
 }
 
 ESPACOS = 5
@@ -55,38 +78,69 @@ class Carta:
     categoria: str
     eh_categoria: bool = False
     virada: bool = True          # True = de costas
+    figura: str = ""
+    modo: str = "ambos"          # "ambos" (figura e palavra), "figura" (só a figura) ou "palavra"
+    cadeado: int = 0             # > 0: cadeado que abre com esse número de categorias completas
 
 
 def dificuldade(nivel):
-    """(categorias, palavras por categoria, cartas por coluna, rótulo)."""
-    cats = min(3 + nivel // 3, 8)
-    palavras = min(3 + nivel // 4, 6)
-    por_coluna = min(2 + nivel // 3, 6)
-    rotulo = "Fácil" if nivel < 4 else "Médio" if nivel < 10 else "Difícil" if nivel < 20 else "Super difícil"
-    return cats, palavras, por_coluna, rotulo
+    """
+    Como o nível aperta. Cada faixa traz uma coisa nova:
+        1-5    figura + palavra, poucas categorias, jogada sobrando
+        6-11   algumas cartas só com figura
+        12-19  cadeados nas colunas (abrem quando você completa categorias)
+        20-34  mais categorias, mais palavras, quase tudo só figura
+        35+    "Lendário": tudo no máximo e jogadas contadas
+    """
+    n = max(1, nivel)
+    cats = min(3 + n // 3, 12)
+    palavras = min(3 + n // 4, 8)
+    por_coluna = min(2 + n // 3, 6)
+    so_figura = 0.0 if n < 6 else min(0.15 + (n - 6) * 0.03, 0.85)
+    cadeados = 0 if n < 12 else min(1 + (n - 12) // 6, 3)
+    folga = max(2.15, 3.0 - min(n, 40) / 40 * 1.0)
+    rotulo = ("Fácil" if n < 6 else "Médio" if n < 12 else "Difícil" if n < 20
+              else "Super difícil" if n < 35 else "Lendário")
+    return {"cats": cats, "palavras": palavras, "por_coluna": por_coluna, "so_figura": so_figura,
+            "cadeados": cadeados, "folga": folga, "rotulo": rotulo}
+
+
+def eh_bau(nivel):
+    """A cada 5 níveis, um baú de moedas."""
+    return nivel % 5 == 0
 
 
 class Partida:
     def __init__(self, nivel, semente=None):
         self.nivel = nivel
         r = random.Random(semente)
-        cats, n_palavras, por_coluna, self.rotulo = dificuldade(nivel)
+        d = dificuldade(nivel)
+        self.rotulo = d["rotulo"]
+        cats, n_palavras = d["cats"], d["palavras"]
         escolhidas = r.sample(sorted(CATEGORIAS), cats)
         cartas, i = [], 0
         for c in escolhidas:
-            cartas.append(Carta(i, c, c, eh_categoria=True))
+            fig_cat, itens = CATEGORIAS[c]
+            cartas.append(Carta(i, c, c, eh_categoria=True, figura=fig_cat))
             i += 1
-            for w in r.sample(CATEGORIAS[c], n_palavras):
-                cartas.append(Carta(i, w, c))
+            for w, fig in r.sample(itens, n_palavras):
+                modo = "figura" if r.random() < d["so_figura"] else "ambos"
+                cartas.append(Carta(i, w, c, figura=fig, modo=modo))
                 i += 1
         r.shuffle(cartas)
         self.total_categorias = cats
         self.tamanho = {c: n_palavras for c in escolhidas}
         self.colunas = [[] for _ in range(COLUNAS)]
         for col in range(COLUNAS):
-            for _ in range(por_coluna):
+            for _ in range(d["por_coluna"]):
                 if cartas:
                     self.colunas[col].append(cartas.pop())
+        # cadeados: entram no meio de colunas e só abrem com categorias completas
+        cols_com_cadeado = r.sample(range(COLUNAS), d["cadeados"])
+        for k, col in enumerate(cols_com_cadeado):
+            pos = max(1, len(self.colunas[col]) // 2)
+            requisito = min(cats - 1, 1 + k + r.randint(0, 1))
+            self.colunas[col].insert(pos, Carta(1000 + k, "cadeado", "", virada=False, cadeado=max(1, requisito)))
         for col in self.colunas:
             if col:
                 col[-1].virada = False
@@ -94,8 +148,7 @@ class Partida:
         self.descarte = []
         self.espacos = [None] * ESPACOS     # {"cat", "total", "dentro"}
         self.completas = 0
-        folga = 3.0 - min(nivel, 30) / 30 * 0.8          # menos jogadas sobrando nos níveis altos
-        self.jogadas = int(len(self.tamanho) * (n_palavras + 1) * folga) + 10
+        self.jogadas = int(len(self.tamanho) * (n_palavras + 1) * d["folga"]) + 10 + 6 * d["cadeados"]
         self.ganhos = []                    # eventos de moeda para a tela: (quanto, motivo)
         self._historico = []
 
@@ -124,12 +177,13 @@ class Partida:
     def pilha_movel(self, col):
         """Índice de onde começa a pilha que pode ser levada (palavras viradas para cima, mesma categoria)."""
         c = self.colunas[col]
-        if not c or c[-1].virada:
+        if not c or c[-1].virada or c[-1].cadeado:
             return None
         i = len(c) - 1
         if c[i].eh_categoria:
             return i
-        while i > 0 and not c[i - 1].virada and not c[i - 1].eh_categoria and c[i - 1].categoria == c[i].categoria:
+        while (i > 0 and not c[i - 1].virada and not c[i - 1].eh_categoria and not c[i - 1].cadeado
+               and c[i - 1].categoria == c[i].categoria):
             i -= 1
         return i
 
@@ -161,7 +215,7 @@ class Partida:
             if not alvo:
                 return True
             topo = alvo[-1]
-            if topo.virada:
+            if topo.virada or topo.cadeado:
                 return False
             if primeira.eh_categoria:
                 return False
@@ -199,10 +253,20 @@ class Partida:
                     self.ganhos.append((10 + self.espacos[j]["total"] * 2, f"completou {self.espacos[j]['cat']}"))
                     self.espacos[j] = None
                     self.completas += 1
+                    self._abrir_cadeados()
                     if self.venceu:
                         self.ganhos.append((30 + 5 * self.nivel + self.jogadas // 2, f"venceu o nível {self.nivel}"))
         self.jogadas -= 1
         return True
+
+    def _abrir_cadeados(self):
+        for col in self.colunas:
+            for k in range(len(col) - 1, -1, -1):
+                if col[k].cadeado and self.completas >= col[k].cadeado:
+                    del col[k]
+                    self.ganhos.append((5, "abriu um cadeado"))
+            if col and col[-1].virada:
+                col[-1].virada = False
 
     def comprar(self):
         """Vira uma carta do monte (ou devolve o descarte para o monte, se ele acabou)."""

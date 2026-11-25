@@ -8,12 +8,12 @@ Clique no monte para virar uma carta. Dica e Desfazer: 3 grátis por nível, dep
 import time
 
 from PySide6.QtCore import QPointF, QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QPainter, QPen, QPolygonF
+from PySide6.QtGui import QColor, QFont, QFontMetricsF, QPainter, QPen, QPolygonF
 from PySide6.QtWidgets import QWidget
 
 from ..body.desenho_rosto import draw_face
 from ..core.emotion import PRIORITY
-from ..core.paciencia import COLUNAS, ESPACOS, RECOMPENSA_DIARIA, Partida, Progresso
+from ..core.paciencia import COLUNAS, ESPACOS, RECOMPENSA_DIARIA, Partida, Progresso, eh_bau
 
 W, H = 480, 820
 CW, CH = 82, 112
@@ -26,6 +26,25 @@ VERDE, VERDE_ESC = QColor("#159a49"), QColor("#0b6e31")
 
 def _x(i):
     return GAP + i * (CW + GAP)
+
+
+def caber(p, r, texto, maximo, minimo=7, alinhar=Qt.AlignCenter):
+    """Escreve `texto` dentro de `r` com a maior fonte que couber (quebra linha só entre palavras)."""
+    flags = alinhar | Qt.TextWordWrap
+    for tam in range(maximo, minimo - 1, -1):
+        fonte = QFont("Segoe UI", tam, QFont.Bold)
+        m = QFontMetricsF(fonte)
+        maior_palavra = max((m.horizontalAdvance(w) for w in texto.split()), default=0)
+        caixa = m.boundingRect(r, int(flags), texto)
+        if maior_palavra <= r.width() and caixa.height() <= r.height():
+            break
+    p.setFont(fonte)
+    p.drawText(r, flags, texto)
+
+
+def figura(p, r, emoji, tam):
+    p.setFont(QFont("Segoe UI Emoji", tam))
+    p.drawText(r, Qt.AlignCenter, emoji)
 
 
 class Paciencia(QWidget):
@@ -174,7 +193,10 @@ class Paciencia(QWidget):
         p.ganhos.clear()
         if p.venceu and not self.aviso:
             self.progresso.venceu()
-            self.aviso = ("venceu", p.nivel)
+            bau = 0
+            if eh_bau(p.nivel):
+                bau = self.app.carteira.ganhar(50 + p.nivel * 5, f"baú do nível {p.nivel}")
+            self.aviso = ("venceu", (p.nivel, bau))
             self.app.emotion.force("feliz", 5.0, priority=PRIORITY.get("carinho", 15))
         elif p.perdeu and not self.aviso:
             self.aviso = ("perdeu", p.nivel)
@@ -220,7 +242,8 @@ class Paciencia(QWidget):
     def _barra(self, p):
         self._pilula(p, QRectF(14, 16, 130, 38), f"🪙 {self.app.carteira.moedas}")
         pt = self.partida
-        self._pilula(p, QRectF(154, 16, 170, 38), f"Nível {pt.nivel} · {pt.rotulo}")
+        self._pilula(p, QRectF(154, 16, 170, 38), f"Nível {pt.nivel} · {pt.rotulo}",
+                     "#6a1b9a" if pt.rotulo in ("Super difícil", "Lendário") else "#0b5d29")
         cor = "#b71c1c" if pt.jogadas <= 10 else "#0b5d29"
         self._pilula(p, QRectF(334, 16, 132, 38), f"Jogadas {max(0, pt.jogadas)}", cor)
         p.setPen(QColor("#d7f5df"))
@@ -249,6 +272,9 @@ class Paciencia(QWidget):
                                  QPointF(cx + s, cy + s * .6)]))
 
     def _frente(self, p, r, carta, selecionada=False, dica=False, coberta=False):
+        if carta.cadeado:
+            self._cadeado(p, r, carta, coberta)
+            return
         borda = QColor("#ffb300") if carta.eh_categoria else QColor("#e8dcc4")
         if selecionada:
             borda = QColor("#29b6f6")
@@ -258,21 +284,49 @@ class Paciencia(QWidget):
         p.setBrush(QColor("#fffaf0"))
         p.drawRoundedRect(r, 9, 9)
         p.setPen(QColor("#5d4037"))
-        if coberta:                                     # só aparece a faixa de cima: o nome vai lá
+        so_figura = carta.modo == "figura" and not carta.eh_categoria
+        if coberta:                                     # só aparece a faixa de cima
+            x = r.left() + 6
             if carta.eh_categoria:
-                self._coroa(p, r.left() + 14, r.top() + 14, 7, QColor("#ffb300"))
-            p.setFont(QFont("Segoe UI", 9, QFont.Bold))
-            p.drawText(QRectF(r.left() + (24 if carta.eh_categoria else 6), r.top() + 4, r.width() - 30, 22),
-                       Qt.AlignLeft | Qt.AlignVCenter, carta.texto)
+                self._coroa(p, r.left() + 13, r.top() + 14, 7, QColor("#ffb300"))
+                x = r.left() + 22
+            if carta.figura:
+                figura(p, QRectF(x - 2, r.top() + 3, 20, 22), carta.figura, 11)
+                x += 18
+            if not so_figura:
+                caber(p, QRectF(x, r.top() + 4, r.right() - x - 4, 22), carta.texto, 9, 6,
+                      Qt.AlignLeft | Qt.AlignVCenter)
             return
         if carta.eh_categoria:
             self._coroa(p, r.left() + 16, r.top() + 16, 9, QColor("#ffb300"))
             p.setFont(QFont("Segoe UI", 9, QFont.Bold))
             p.drawText(QRectF(r.left(), r.top() + 6, r.width() - 8, 20), Qt.AlignRight,
                        f"0/{self.partida.tamanho[carta.categoria]}")
-        tam = 13 if len(carta.texto) <= 9 else 11 if len(carta.texto) <= 13 else 9
-        p.setFont(QFont("Segoe UI", tam, QFont.Bold))
-        p.drawText(r.adjusted(4, 18, -4, -6), Qt.AlignCenter | Qt.TextWordWrap, carta.texto)
+        if so_figura:
+            figura(p, r.adjusted(2, 8, -2, -4), carta.figura, 34)
+            return
+        if carta.figura:
+            figura(p, QRectF(r.left(), r.top() + 22, r.width(), 40), carta.figura, 24)
+            caber(p, QRectF(r.left() + 4, r.top() + 64, r.width() - 8, r.height() - 70), carta.texto, 13)
+        else:
+            caber(p, r.adjusted(4, 18, -4, -6), carta.texto, 13)
+
+    def _cadeado(self, p, r, carta, coberta):
+        p.setPen(QPen(QColor("#e65100"), 3))
+        p.setBrush(QColor("#5c6bc0"))
+        p.drawRoundedRect(r, 9, 9)
+        cx = r.center().x()
+        cy = r.top() + 16 if coberta else r.center().y()
+        p.setPen(QPen(QColor("#ffca28"), 4))
+        p.setBrush(Qt.NoBrush)
+        p.drawArc(QRectF(cx - 11, cy - 22, 22, 24), 0, 180 * 16)
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor("#ffb300"))
+        p.drawRoundedRect(QRectF(cx - 16, cy - 10, 32, 26), 6, 6)
+        p.setPen(QColor("#ffffff"))
+        p.setFont(QFont("Segoe UI", 10, QFont.Black))
+        p.drawText(QRectF(cx - 16, cy - 10, 32, 26), Qt.AlignCenter,
+                   f"{min(self.partida.completas, carta.cadeado)}/{carta.cadeado}")
 
     def _monte(self, p):
         pt = self.partida
@@ -317,9 +371,9 @@ class Paciencia(QWidget):
                 p.setPen(QColor("#5d4037"))
                 p.setFont(QFont("Segoe UI", 9, QFont.Bold))
                 p.drawText(QRectF(r.left(), r.top() + 6, r.width() - 8, 20), Qt.AlignRight, f"{e['dentro']}/{e['total']}")
-                tam = 12 if len(e["cat"]) <= 8 else 10 if len(e["cat"]) <= 11 else 9
-                p.setFont(QFont("Segoe UI", tam, QFont.Bold))
-                p.drawText(r.adjusted(4, 18, -4, -6), Qt.AlignCenter | Qt.TextWordWrap, e["cat"])
+                from ..core.paciencia import CATEGORIAS
+                figura(p, QRectF(r.left(), r.top() + 24, r.width(), 38), CATEGORIAS[e["cat"]][0], 22)
+                caber(p, QRectF(r.left() + 4, r.top() + 64, r.width() - 8, r.height() - 70), e["cat"], 12)
 
     def _colunas(self, p):
         pt = self.partida
@@ -388,7 +442,14 @@ class Paciencia(QWidget):
                 p.setPen(QColor("#5d4037"))
                 p.drawText(caixa, Qt.AlignCenter, str(valor))
         elif tipo == "venceu":
-            titulo, corpo = "Venceu!", f"Nível {dados} completo.\n{self.app.nome} está orgulhoso."
+            nivel, bau = dados
+            titulo = "Venceu!"
+            corpo = f"Nível {nivel} completo.\n{self.app.nome} está orgulhoso."
+            if bau:
+                corpo += f"\nBaú aberto: +{bau} moedas!"
+            else:
+                proximo = (nivel // 5 + 1) * 5
+                corpo += f"\nPróximo baú no nível {proximo}."
         else:
             titulo, corpo = "Acabaram as jogadas", "Quase! Toque para tentar de novo."
         p.setPen(QColor("#5d4037"))
