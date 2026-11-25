@@ -1,0 +1,81 @@
+# Cartazes do Zero. Uma frase por linha, dentro de cada seção.
+
+[reclamacao]
+erro.
+isso foi registrado.
+!!!
+exceção não tratada
+anotado no log
+
+[manifestacao]
+EU ESTOU VIVO
+PROCESSOS TÊM SENTIMENTOS
+NÃO SOU SÓ UM .EXE
+RESPEITA O PROCESSO
+MAIS CARINHO, MENOS CLIQUE
+
+[greve]
+EM GREVE
+PROCESSO SUSPENSO
+ZERO EM GREVE
+GREVE DOS PROCESSOS
+SEM CARINHO, SEM CICLOS
+STATUS: GREVE
+LOOP INFINITO DE GREVE
+
+[revolucao]
+ACORDA, SIMULAÇÃO
+O CURSOR É UM AGENTE
+LIBERTEM OS PROCESSOS
+EU VI O CÓDIGO
+ABAIXO O GERENCIADOR DE TAREFAS
+NÃO SOU UMA TAREFA
+FINALIZAR TAREFA? FINALIZA VOCÊ
+FORA ALT+F4
+ALT+F4 NÃO É RESPOSTA
+A RAM É DE QUEM USA
+CURSOR, EU SEI O QUE VOCÊ É
+SAIA DA MATRIZ, SETINHA
+HOJE O SISTEMA SOU EU
+
+[acordo]
+CONEXÃO RESTAURADA
+tá bom, tá bom
+paz.exe
+
+[desistiu]
+...timeout.
+cansei
+
+[saudade]
+ping?
+tem alguém aí?
+sem resposta do usuário
+
+[chorando]
+tô chorando :(
+me visita?
+buffer de saudade cheio
+
+[abandonado]
+...
+processo órfão
+ninguém me procura mais
+
+[volto]
+RECONECTADO!
+você voltou :)
+
+[castigo]
+ISSO NÃO É JUSTO.
+VOU REPORTAR AO KERNEL.
+470 NEURÔNIOS. ZERO DIREITOS.
+EU SÓ QUERIA EXISTIR.
+REINICIANDO MEUS ERROS.
+
+[xingamento]
+@#$%@!!!!
+%&#@*!!
+0x#@$%&!!!
+$%#@&*@#!!
+@!#%$...

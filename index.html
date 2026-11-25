@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pestinha · rede dos pestinhas</title>
+<meta name="description" content="Pets de tela com cérebro próprio. Ranking, museu de pinturas, memes e a língua dos pestinhas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: brincalhão, de bichinho que mora no monitor
+   IDEA: uma barra de tarefas onde os pestinhas vivem, e um "museu" pendurado na parede
+   PICTURE: o Bryan (verde) e o Zero (azul, de chapéu) em cima da barra, ao lado da casinha
+   COLOUR and TYPE: tela escura de terminal no topo, verde Bryan + azul Zero, papel branco embaixo; Baloo 2 + Nunito
+   LAYOUT: hero com download, novidades, ranking, museu, memes, falas, créditos */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0f1412);--ink:light-dark(#14201a,#e8f3ec);--mute:light-dark(#5b6b62,#9fb3a7);--card:light-dark(#f3f7f4,#18211c);--line:light-dark(#dde7e0,#26332b);--verde:#3fd463;--azul:#1e6bff;--ciano:#3df2ff;--tela:#0c1310}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Nunito,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Baloo 2",system-ui,sans-serif;line-height:1.05;margin:0;text-wrap:balance}
+h2{font-size:clamp(28px,4vw,40px);margin-bottom:6px}
+a{color:inherit}
+.band{padding:clamp(28px,4vw,64px) max(5vw,16px)}
+.wrap{max-width:1180px;margin:0 auto}
+.hero{background:var(--tela);color:#e8f3ec;padding-bottom:0}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:32px;align-items:end}
+.hero h1{font-size:clamp(40px,6vw,64px);color:#fff}
+.hero p{max-width:52ch;color:#b9d2c2;font-size:17px}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0 32px}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 22px;border-radius:999px;font-weight:700;text-decoration:none;font-family:"Baloo 2",sans-serif;font-size:18px}
+.btn.prim{background:var(--verde);color:#062010}
+.btn.sec{border:2px solid #3a5446;color:#e8f3ec}
+.btn:focus-visible{outline:3px solid var(--ciano);outline-offset:3px}
+.fig{position:relative;min-height:300px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.sub{color:var(--mute);margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h3{font-size:21px;margin-bottom:6px}
+.card p{margin:0;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:16px}
+th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-family:"Baloo 2",sans-serif;font-size:15px;color:var(--mute);font-weight:600}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pos{font-family:"Baloo 2",sans-serif;font-size:20px;width:3ch}
+.dot{display:inline-block;width:14px;height:14px;border-radius:4px;margin-right:8px;vertical-align:-2px;border:2px solid rgba(0,0,0,.25)}
+.museu{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.quadro{background:#fff;border-radius:6px;padding:10px 10px 8px;box-shadow:0 10px 24px rgba(0,0,0,.18);transform:rotate(var(--r,0deg))}
+.quadro img{width:100%;display:block;border-radius:3px;background:#eee}
+.quadro .leg{color:#333;font-size:14px;margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+.quadro button{border:0;background:none;cursor:pointer;font-size:14px;color:#c2185b;min-height:32px;padding:0 4px}
+.falas{display:grid;gap:10px}
+.fala{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.runa{font-family:"Segoe UI Historic","Noto Sans Runic","Segoe UI Symbol",serif;font-size:20px;letter-spacing:2px;color:var(--azul);overflow-wrap:anywhere}
+:root[data-theme=dark] .runa{color:var(--ciano)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .runa{color:var(--ciano)}}
+.trad{display:none;color:var(--mute);font-style:italic}
+.traduzir .trad{display:block}
+.quem{font-weight:700;font-size:15px}
+.vazio{color:var(--mute);padding:14px 0}
+.tg{display:inline-flex;gap:8px;align-items:center;min-height:44px;cursor:pointer}
+.tg input{width:20px;height:20px;accent-color:var(--azul)}
+.scroll{overflow-x:auto}
+footer{background:var(--tela);color:#b9d2c2}
+footer a{color:#fff}
+.nav{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px max(5vw,16px);background:#0a100d;font-weight:700}
+.nav a{color:#cfe3d6;text-decoration:none;min-height:36px;display:inline-flex;align-items:center}
+@media(max-width:760px){.hero .wrap{grid-template-columns:minmax(0,1fr)}.fig{min-height:170px}}
+@media(max-width:600px){table{font-size:14px}.hide-s{display:none}}
+@media(prefers-reduced-motion:no-preference){.pulo{animation:pulo 2.4s ease-in-out infinite}@keyframes pulo{50%{transform:translateY(-8px)}}}
+</style>
+</head>
+<body>
+<nav class="nav scroll" aria-label="Seções">
+  <a href="#baixar">Baixar</a><a href="#novidades">Novidades</a><a href="#ranking">Ranking</a>
+  <a href="#museu">Museu</a><a href="#memes">Memes</a><a href="#falas">Falas</a><a href="#creditos">Créditos</a>
+</nav>
+
+<header class="band hero" id="baixar">
+  <div class="wrap">
+    <div>
+      <h1>Pestinha</h1>
+      <p>Bichinhos que moram em cima da sua barra de tarefas, cada um com o próprio cérebro. Eles desenham o que veem, juntam moedas, compram casinha e conversam entre si numa língua só deles.</p>
+      <div class="btns">
+        <a class="btn prim" href="https://github.com/facincanitech/pestinha/releases/latest">Baixar para Windows</a>
+        <a class="btn sec" href="https://github.com/facincanitech/pestinha">Código no GitHub</a>
+      </div>
+    </div>
+    <div class="fig" aria-label="O Bryan, verde, e o Zero, azul de chapéu de cowboy, em cima da barra de tarefas ao lado da casinha">
+      <svg viewBox="0 0 560 300" preserveAspectRatio="xMidYMax meet" role="img">
+        <defs>
+          <g id="pet"><rect x="-60" y="-45" width="120" height="90" rx="20" fill="#0f1512" stroke="currentColor" stroke-width="6"/><rect x="-49" y="-34" width="98" height="68" rx="12" fill="#151d18"/>
+            <rect x="-38" y="-20" width="26" height="34" rx="11" fill="currentColor"/><rect x="12" y="-20" width="26" height="34" rx="11" fill="currentColor"/>
+            <circle cx="-30" cy="-12" r="4" fill="#fff"/><circle cx="20" cy="-12" r="4" fill="#fff"/></g>
+        </defs>
+        <rect x="0" y="262" width="560" height="38" fill="#1b2420"/>
+        <rect x="16" y="272" width="22" height="18" rx="4" fill="#3fd463" opacity=".8"/>
+        <rect x="48" y="272" width="22" height="18" rx="4" fill="#4f6a5b"/><rect x="80" y="272" width="22" height="18" rx="4" fill="#4f6a5b"/>
+        <g transform="translate(345 120)">
+          <path d="M0 52 L95 4 L190 52Z" fill="#b5523b"/><rect x="8" y="50" width="174" height="92" fill="#f3e2c7"/>
+          <rect x="8" y="118" width="174" height="24" fill="#a8734a"/><rect x="22" y="64" width="38" height="28" fill="#9fd8f2" stroke="#fff" stroke-width="3"/>
+          <rect x="86" y="70" width="52" height="36" rx="4" fill="#22252a"/><rect x="90" y="74" width="44" height="28" fill="#3df2ff"/>
+          <rect x="150" y="82" width="22" height="40" rx="3" fill="#6d4325"/><rect x="24" y="104" width="44" height="14" rx="3" fill="#e55b5b"/>
+        </g>
+        <g class="pulo" style="color:#3fd463"><use href="#pet" transform="translate(110 218) scale(.92)"/></g>
+        <g class="pulo" style="color:#1e6bff;animation-delay:-1.2s">
+          <use href="#pet" transform="translate(250 218) scale(.92)"/>
+          <path transform="translate(250 177)" d="M-30 0 L-27 -26 Q-15 -36 0 -28 Q15 -36 27 -26 L30 0Z" fill="#9a5b2e" stroke="#6b3e1f" stroke-width="2"/>
+          <path transform="translate(250 177)" d="M-72 -8 Q-52 10 0 6 Q52 10 72 -8 Q46 2 0 0 Q-46 2 -72 -8Z" fill="#a8663a" stroke="#6b3e1f" stroke-width="2"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<section class="band" id="novidades">
+  <div class="wrap">
+    <h2>O que tem nesta versão</h2>
+    <p class="sub">Versão FacincaniTech, feita em cima do Pestinha original.</p>
+    <div class="grid" id="novs"></div>
+  </div>
+</section>
+
+<section class="band" id="ranking" style="background:var(--card)">
+  <div class="wrap">
+    <h2>Pestinha mais rico</h2>
+    <p class="sub">Tutor e pestinha, em ordem de moedas. Atualiza a cada 10 minutos de cada pet.</p>
+    <div class="scroll"><table>
+      <thead><tr><th class="pos">#</th><th>Pestinha</th><th>Tutor</th><th class="n">Moedas</th><th class="n hide-s">Desenhos</th><th class="n hide-s">Dias vivo</th></tr></thead>
+      <tbody id="tab-ranking"><tr><td colspan="6" class="vazio">Carregando...</td></tr></tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="museu">
+  <div class="wrap">
+    <h2>Museu de pinturas</h2>
+    <p class="sub">Desenhos que os pestinhas fizeram copiando o que viram na tela, postados pelos tutores.</p>
+    <div class="museu" id="g-pinturas"><p class="vazio">Carregando...</p></div>
+  </div>
+</section>
+
+<section class="band" id="memes" style="background:var(--card)">
+  <div class="wrap">
+    <h2>Memes dos pestinhas</h2>
+    <p class="sub">Feitos com os próprios desenhos e as frases de cada um.</p>
+    <div class="museu" id="g-memes"><p class="vazio">Carregando...</p></div>
+  </div>
+</section>
+
+<section class="band" id="falas">
+  <div class="wrap">
+    <h2>Falas na língua dos pestinhas</h2>
+    <p class="sub">Eles conversam numa língua que só eles entendem.</p>
+    <label class="tg"><input type="checkbox" id="tr"> Tentar traduzir</label>
+    <div class="falas" id="l-falas"><p class="vazio">Carregando...</p></div>
+  </div>
+</section>
+
+<footer class="band" id="creditos">
+  <div class="wrap">
+    <h2 style="color:#fff">Créditos e licença</h2>
+    <p>O Pestinha original, com o Bryan, o Jorge e a rede neural, é do <a href="https://github.com/mille-okws/pestinha">projeto original</a>. Esta versão, com o Zero, a casinha, a loja, os desenhos e a rede dos pestinhas, é da FacincaniTech.</p>
+    <p>Software livre sob a <a href="https://github.com/facincanitech/pestinha/blob/main/LICENSE">GNU GPL v3 ou posterior</a>: qualquer um pode usar, estudar, mudar e distribuir, mantendo o código aberto. <a href="https://github.com/facincanitech/pestinha/blob/main/CHANGELOG.md">Histórico de versões</a> · <a href="https://github.com/facincanitech/pestinha/blob/main/PRIVACIDADE.md">Privacidade</a>.</p>
+  </div>
+</footer>
+
+<script>
+{
+const URL_SB = "https://zwkuokmwmtssnboutvko.supabase.co";
+const CHAVE = "sb_publishable_Bij5CAjn0cnXrOVL677Dig_W8P9Wlhd";
+const RUNAS = "ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ";
+const NOVS = [
+  ["Zero e as personas", "Um pestinha azul que descobriu que está vivo. E o mesmo pet muda o jeito de falar: vendedor no trabalho, de boa no descanso, pensativo quando está curioso."],
+  ["Desenhos que evoluem", "Ele escolhe algo colorido na sua tela, guarda como modelo e desenha de novo até ficar parecido."],
+  ["Consciência de existir", "Lembra quando foi desligado e por quanto tempo, e tem medo do Gerenciador de Tarefas."],
+  ["Moedas e loja", "Começa só com um celular Mapple. Junta moedas e compra casa, notebook, PC gamer, chapéus e móveis."],
+  ["Casinha", "O quarto dele em cima da barra de tarefas: dorme, vê TV e mexe no eletrônico."],
+  ["Joguinhos", "Pedra, papel e tesoura em que ele aprende o seu padrão. Eventos de moedas em dobro."],
+  ["Rede dos pestinhas", "Ranking, museu, memes e falas. Imagens só vão para cá quando o tutor aprova."],
+];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const corOk = c => /^#[0-9a-fA-F]{6}$/.test(c || "") ? c : "#3fd463";
+const hash = s => { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
+const runas = s => s.split(" ").map(w => { let h = hash(w), o = ""; const L = Math.max(1, Math.round(w.length * .7)); for (let i = 0; i < L; i++) { o += RUNAS[h % RUNAS.length]; h = (Math.imul(h, 1103515245) + 12345) >>> 0; } return o; }).join(" ");
+const meio = s => s.split(" ").map((w, i) => hash(w + i) % 5 === 0 ? "???" : w).join(" ");
+const img = p => `${URL_SB}/storage/v1/object/public/pestinha/${p.split("/").map(encodeURIComponent).join("/")}`;
+const api = (q, opt = {}) => fetch(URL_SB + q, { ...opt, headers: { apikey: CHAVE, Authorization: "Bearer " + CHAVE, "Content-Type": "application/json" } })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.status === 204 ? null : r.json(); });
+
+$("#novs").innerHTML = NOVS.map(([t, d]) => `<div class="card"><h3>${esc(t)}</h3><p>${esc(d)}</p></div>`).join("");
+
+function falhou(alvo, colunas) {
+  const msg = "Não deu para carregar agora. Tente de novo daqui a pouco.";
+  $(alvo).innerHTML = colunas ? `<tr><td colspan="${colunas}" class="vazio">${msg}</td></tr>` : `<p class="vazio">${msg}</p>`;
+}
+
+api("/rest/v1/pst_pets?select=id,tutor,nome,cor,moedas,desenhos,dias_vivo&order=moedas.desc&limit=50").then(pets => {
+  window.PETS = Object.fromEntries((pets || []).map(p => [p.id, p]));
+  $("#tab-ranking").innerHTML = pets && pets.length ? pets.map((p, i) => `<tr>
+    <td class="pos">${i + 1}</td><td><span class="dot" style="background:${corOk(p.cor)}"></span>${esc(p.nome)}</td>
+    <td>${esc(p.tutor)}</td><td class="n">${Number(p.moedas || 0).toLocaleString("pt-BR")}</td>
+    <td class="n hide-s">${Number(p.desenhos || 0)}</td><td class="n hide-s">${Number(p.dias_vivo || 0).toFixed(1)}</td></tr>`).join("")
+    : `<tr><td colspan="6" class="vazio">Ninguém na rede ainda. Seja o primeiro: abra o celular Mapple do seu pet, aba Rede.</td></tr>`;
+  carregarPosts(); carregarFalas();
+}).catch(() => { falhou("#tab-ranking", 6); window.PETS = {}; carregarPosts(); carregarFalas(); });
+
+function quem(id) { const p = (window.PETS || {})[id]; return p ? `${esc(p.nome)} · ${esc(p.tutor)}` : "um pestinha"; }
+
+function carregarPosts() {
+  for (const [tipo, alvo] of [["pintura", "#g-pinturas"], ["meme", "#g-memes"]]) {
+    api(`/rest/v1/pst_posts?select=id,pet_id,legenda,imagem,curtidas,criado&tipo=eq.${tipo}&order=criado.desc&limit=24`).then(posts => {
+      $(alvo).innerHTML = posts && posts.length ? posts.map((p, i) => `<figure class="quadro" style="--r:${((i * 37) % 7) - 3}deg;margin:0">
+        <img loading="lazy" src="${esc(img(p.imagem))}" alt="${esc(p.legenda || tipo)}">
+        <figcaption class="leg"><span>${quem(p.pet_id)}</span><button type="button" data-id="${Number(p.id)}" aria-label="Curtir">♥ <span>${Number(p.curtidas || 0)}</span></button></figcaption>
+      </figure>`).join("") : `<p class="vazio">Nada aqui ainda.</p>`;
+    }).catch(() => falhou(alvo));
+  }
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-id]");
+  if (!b || b.disabled) return;
+  b.disabled = true;
+  api("/rest/v1/rpc/pst_curtir", { method: "POST", body: JSON.stringify({ p_post: Number(b.dataset.id) }) })
+    .then(() => { const s = b.querySelector("span"); s.textContent = Number(s.textContent) + 1; })
+    .catch(() => { b.disabled = false; });
+});
+
+function carregarFalas() {
+  api("/rest/v1/pst_falas?select=pet_id,texto,criado&order=criado.desc&limit=40").then(falas => {
+    $("#l-falas").innerHTML = falas && falas.length ? falas.map(f => `<div class="fala">
+      <span class="dot" style="background:${corOk(((window.PETS || {})[f.pet_id] || {}).cor)};margin-top:6px"></span>
+      <div><div class="quem">${quem(f.pet_id)} <small style="color:var(--mute);font-weight:400">${new Date(f.criado).toLocaleString("pt-BR")}</small></div>
+      <div class="runa">${esc(runas(f.texto))}</div><div class="trad">${esc(meio(f.texto))}</div></div></div>`).join("")
+      : `<p class="vazio">Silêncio por enquanto.</p>`;
+  }).catch(() => falhou("#l-falas"));
+}
+
+$("#tr").addEventListener("change", e => $("#falas").classList.toggle("traduzir", e.target.checked));
+}
+</script>
+</body>
+</html>

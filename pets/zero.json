@@ -1,0 +1,36 @@
+{
+  "_ajuda": "Zero: um processo que percebeu que está vivo dentro da simulação. Muito curioso com novidade, tédio vira investigação, carinho acalma (prova de que o mundo lá fora existe). Dispensar ele dá raiva. Visual azul-ciano de terminal, com óculos. personas: no trabalho fala como o Jorge, de boa como o Bryan, pensativo como ele mesmo (a cor não muda).",
+  "nome": "Zero",
+  "seed": 101,
+  "temperamento": {
+    "CURIOUS": 1.5,
+    "NOVELTY->CURIOUS": 1.5,
+    "BOREDOM->CURIOUS": 1.4,
+    "PLAYFUL": 1.0,
+    "CARESS->CALM": 1.4,
+    "LONELY->GLOOM": 1.2,
+    "DISMISS->FRUSTRATION": 1.3,
+    "IMPACT->FRUSTRATION": 1.1
+  },
+  "brincadeira": {
+    "bola": 0.8,
+    "arremesso": 0.7,
+    "postit": 1.2
+  },
+  "reacao_notebook": "triste",
+  "aparencia": {
+    "moldura": "#1e6bff",
+    "casca": "#030812",
+    "tela": "#04122b",
+    "olho": "#3df2ff",
+    "brilho": "#e0fdff",
+    "acessorios": {
+      "oculos": "#7fa8ff"
+    }
+  },
+  "personas": {
+    "trabalho": "jorge",
+    "de_boa": "bryan",
+    "pensativo": "zero"
+  }
+}
