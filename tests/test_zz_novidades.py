@@ -99,3 +99,25 @@ def test_ppt_aprende_padrao(tmp_path):
         l.aprender("pedra", l.jogar())
     ganhou = sum(l.jogar() == PERDE_PARA["pedra"] for _ in range(50))
     assert ganhou > 35
+
+
+def test_paciencia_tela_e_regras(monkeypatch):
+    b = _app(monkeypatch)
+    antes = b.carteira.moedas
+    b.abrir_paciencia()
+    tela = b.paciencia
+    assert tela.aviso and tela.aviso[0] == "diaria" and b.carteira.moedas > antes
+    tela.grab().save("/tmp/paciencia_diaria.png")
+    tela.aviso = None
+    pt = tela.partida
+    for _ in range(400):                       # joga seguindo a dica até acabar
+        if pt.venceu or pt.perdeu:
+            break
+        d = pt.dica()
+        if d is None:
+            break
+        pt.comprar() if d == ("monte",) else pt.mover(*d)
+        tela._depois_da_jogada()
+        if pt.completas >= 1 and not tela.aviso:
+            tela.grab().save("/tmp/paciencia_jogo.png")
+    assert pt.venceu or pt.perdeu or pt.completas >= 1

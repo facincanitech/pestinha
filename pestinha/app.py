@@ -554,6 +554,14 @@ class PestinhaApp(SessaoMixin, InteracaoMixin, QObject):
         return {"mapple": "celular Mapple", "notebook": "notebook", "pc_gamer": "PC gamer"}.get(
             self.carteira.eletronico, "celular")
 
+    def abrir_paciencia(self):
+        from .ui.paciencia_ui import Paciencia
+        if getattr(self, "paciencia", None) is None:
+            self.paciencia = Paciencia(self)
+        self.paciencia.show()
+        self.paciencia.raise_()
+        self.paciencia.activateWindow()
+
     def abrir_aparelho(self):
         from .ui.aparelho import Aparelho
         if self.aparelho is None:
