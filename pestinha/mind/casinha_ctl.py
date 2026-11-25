@@ -19,7 +19,6 @@ from PySide6.QtWidgets import QMenu
 
 from ..body.desenho_rosto import com_acessorio
 from ..log import log
-from ..store import read_json, write_json
 from ..world.casinha import Casinha
 
 CHAPEUS = ("chapeu_cowboy", "bone", "coroa")

@@ -8,11 +8,10 @@ A TV passa o modelo que ele está tentando desenhar (ver world/desenho.py).
 """
 
 import math
-import random
 import time
 
 from PySide6.QtCore import QPointF, QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QGuiApplication, QImage, QPainter, QPainterPath, QPen, QPolygonF
+from PySide6.QtGui import QColor, QGuiApplication, QImage, QPainter, QPainterPath, QPen, QPolygonF
 
 from ..body.desenho_rosto import draw_face, draw_zzz
 from .arrastavel import FloatingWidget, save_position

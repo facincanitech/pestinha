@@ -8,8 +8,8 @@ Postar imagem na rede pede sempre a sua confirmação (as imagens vêm da sua te
 import time
 from datetime import datetime
 
-from PySide6.QtCore import QObject, Qt, QUrl, Signal
-from PySide6.QtGui import QDesktopServices, QPixmap
+from PySide6.QtCore import QObject, Qt, Signal
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QCheckBox, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget, QMessageBox,
                                QPushButton, QScrollArea, QTabWidget, QVBoxLayout, QWidget)
 

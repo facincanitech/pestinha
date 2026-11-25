@@ -12,8 +12,6 @@ A aparência continua a do pet escolhido: o Zero fica azul mesmo falando como o 
 Fora disso, volta para o próprio conteúdo. A troca só acontece se o momento durar (sem piscar).
 """
 
-import time
-
 from .. import config
 from ..log import log
 
