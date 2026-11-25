@@ -26,24 +26,26 @@ jobs:
       - name: Tempo ocioso no KDE Plasma com Wayland (opcional, fora do requirements.txt)
         if: runner.os == 'Linux'
         run: pip install "pywayland>=0.4.19"
-      - name: Gerar o executável
+      - name: Gerar o executável (lançador com o código dentro)
         shell: bash
         run: |
+          # O .exe é o lancador.py: baixa versões novas do código sozinho (ver lancador.py).
+          # O código vai dentro dele como arquivos (embutido/), para ser a versão de reserva sem internet.
           EXTRA=""
-          if [ "$RUNNER_OS" = "Windows" ]; then EXTRA="--windowed --hidden-import win32timezone"; fi
-          # --specpath build: caminho absoluto, senão o PyInstaller procura o script do KWin dentro de build/
-          if [ "$RUNNER_OS" = "Linux" ]; then EXTRA="--add-data $PWD/pestinha/plataforma/kwin_ponte.js:pestinha/plataforma"; fi
-          python -m PyInstaller --noconfirm --onefile $EXTRA --name Pestinha \
-            --distpath dist --workpath build/work --specpath build main.py
-      - name: Montar a pasta de entrega (executável + assets + pets)
+          if [ "$RUNNER_OS" = "Windows" ]; then EXTRA="--windowed"; fi
+          HIDDEN="$(python ferramentas/importacoes.py)"
+          python -m PyInstaller --noconfirm --onefile $EXTRA $HIDDEN \
+            --add-data "$PWD/pestinha:embutido/pestinha" --add-data "$PWD/main.py:embutido" \
+            --add-data "$PWD/pets:embutido/pets" --add-data "$PWD/assets:embutido/assets" \
+            --add-data "$PWD/atualizacao.json:embutido" \
+            --name Pestinha --distpath dist --workpath build/work --specpath build lancador.py
+      - name: Montar a pasta de entrega
         shell: bash
         run: |
-          # Bash 3.2 no macOS não suporta a expansão ${VAR,,}.
           SISTEMA="$(printf '%s' "$RUNNER_OS" | tr '[:upper:]' '[:lower:]')"
           PASTA="executáveis/$SISTEMA"
           mkdir -p "$PASTA"
           cp -R dist/Pestinha* "$PASTA/"
-          cp -R assets pets "$PASTA/"
       - uses: actions/upload-artifact@v4
         with:
           name: pestinha-${{ runner.os }}

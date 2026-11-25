@@ -23,6 +23,7 @@ Quem faz o quê:
 """
 
 import math
+import os
 import random
 import time
 
@@ -254,7 +255,11 @@ class PestinhaApp(SessaoMixin, InteracaoMixin, QObject):
             problems.append(f"atalho de pânico {config.PANIC_HOTKEY_TEXT} já está em uso por outro programa")
         if problems:
             self.tray.icon.showMessage(config.APP_NOME,"\n".join(problems), QSystemTrayIcon.Warning, 6000)
-        if self.perms["ativo"]:
+        aviso = os.environ.pop("PESTINHA_AVISO", "")         # recado do lançador (versão nova, .exe novo...)
+        if aviso:
+            log(f"[atualização] {aviso}")
+            self.tray.icon.showMessage(self.nome, aviso, QSystemTrayIcon.Information, 6000)
+        elif self.perms["ativo"]:
             self.tray.icon.showMessage(
                 self.nome, f"Estou aqui. Pânico: {config.PANIC_HOTKEY_TEXT}",
                 QSystemTrayIcon.Information, 3000,

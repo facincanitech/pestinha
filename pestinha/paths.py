@@ -25,6 +25,9 @@ from pathlib import Path
 # para você poder editar as pastas sem reempacotar.
 ROOT = (Path(sys.executable).resolve().parent if getattr(sys, "frozen", False)
         else Path(__file__).resolve().parent.parent)
+# Rodando pelo lançador (lancador.py): o código, pets e assets vêm da versão baixada; a memória fica onde sempre esteve.
+if os.environ.get("PESTINHA_RAIZ"):
+    ROOT = Path(os.environ["PESTINHA_RAIZ"])
 
 ID_DE_PET = re.compile(r"^[a-z0-9][a-z0-9_-]{0,39}$")    # vira nome de pasta: nada de "..", "/" ou espaços
 
@@ -177,7 +180,8 @@ class Paths:
     def __post_init__(self):
         """Sem `dados` explícito, escolhe a pasta da memória pela regra de pasta_de_dados."""
         if self.dados is None:
-            object.__setattr__(self, "dados", pasta_de_dados(self.root))
+            fixo = os.environ.get("PESTINHA_DADOS") if self.root == ROOT else None
+            object.__setattr__(self, "dados", Path(fixo) if fixo else pasta_de_dados(self.root))
 
     # ----- conteúdo que você edita -----
 
