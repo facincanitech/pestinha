@@ -3,6 +3,8 @@ name: executáveis
 on:
   push:
     tags: ["v*"]
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
