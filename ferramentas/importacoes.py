@@ -21,7 +21,8 @@ def modulos():
                 achados.update(a.name for a in no.names)
             elif isinstance(no, ast.ImportFrom) and not no.level and no.module:
                 achados.add(no.module)
-                achados.update(f"{no.module}.{a.name}" for a in no.names if no.module == "PySide6")
+                # "from ctypes import wintypes": o nome pode ser um submódulo (o PyInstaller ignora o que não for)
+                achados.update(f"{no.module}.{a.name}" for a in no.names if a.name != "*")
     return sorted(m for m in achados | set(EXTRAS) if not m.startswith("pestinha"))
 
 
