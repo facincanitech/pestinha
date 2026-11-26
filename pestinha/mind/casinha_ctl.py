@@ -64,6 +64,7 @@ class CasinhaController:
             self.atividade = "eletronico"
         if not self.carteira.casa and self.dentro:
             self.sair("sem casa")
+        self.casinha.ajustar_tamanho()
         self.set_visible(self.app.pet.isVisible() or self.dentro)
         self.casinha.update()
 

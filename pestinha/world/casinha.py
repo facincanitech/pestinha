@@ -16,8 +16,9 @@ from PySide6.QtGui import QColor, QGuiApplication, QImage, QPainter, QPainterPat
 from ..body.desenho_rosto import draw_face, draw_zzz
 from .arrastavel import FloatingWidget, save_position
 
-W, H = 300, 220                 # tamanho do desenho; a janela é isso vezes TAMANHO
-TAMANHO = 0.62
+W, H = 300, 220                 # tamanho do desenho; a janela é isso vezes a escala da casa
+TAMANHO = 0.62                  # escala da casinha de madeira (as outras casas crescem ou encolhem a partir dela)
+ESCALA_DA_CASA = {"papelao": 0.42, "barraca": 0.52, "casinha": 0.62, "praia": 0.72, "casa": 0.82, "mansao": 0.96}
 ESCALA_PET = 0.36
 PORTA = QRectF(254, 128, 30, 62)          # na parede da direita
 LUGARES = {                                # onde ele fica em cada atividade (centro do corpo)
@@ -40,6 +41,7 @@ class Casinha(FloatingWidget):
 
     def __init__(self, app, ctl):
         super().__init__(app, "casinha", f"Casinha do {app.nome}", (LW, LH), (LW, LH), _posicao_padrao())
+        self.escala = TAMANHO
         self.ctl = ctl
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
@@ -55,7 +57,21 @@ class Casinha(FloatingWidget):
 
     def porta_global(self):
         """Ponto da porta (no chão) em coordenadas da tela."""
-        return self.x() + PORTA.center().x() * TAMANHO, self.y() + PORTA.bottom() * TAMANHO
+        return self.x() + PORTA.center().x() * self.escala, self.y() + PORTA.bottom() * self.escala
+
+    def ajustar_tamanho(self):
+        """A casa cresce na tela conforme a melhoria: caixa de papelão pequenininha, mansão grandona."""
+        escala = ESCALA_DA_CASA.get(self.ctl.carteira.casa or "casinha", TAMANHO)
+        if abs(escala - self.escala) < 1e-6 and self.width() == int(W * escala):
+            return
+        direita = self.x() + self.width()                 # cresce para a esquerda se encostar na borda
+        self.escala = escala
+        self.setMinimumSize(1, 1)
+        self.setFixedSize(int(W * escala), int(H * escala))
+        tela = QGuiApplication.screenAt(self.geometry().center()) or QGuiApplication.primaryScreen()
+        if direita > tela.availableGeometry().right():
+            self.move(tela.availableGeometry().right() - self.width(), self.y())
+        self.encostar(salvar=True)
 
     def encostar(self, salvar=False):
         """Fica sempre em pé em cima da barra de tarefas (o fundo da área útil da tela em que está)."""
@@ -63,7 +79,7 @@ class Casinha(FloatingWidget):
         tela = QGuiApplication.screenAt(centro) or QGuiApplication.primaryScreen()
         g = tela.availableGeometry()
         x = min(max(self.x(), g.left()), g.right() - self.width() + 1)
-        self.move(x, g.bottom() - self.height() + 1 + int(4 * TAMANHO))   # a sombra do chão passa da borda
+        self.move(x, g.bottom() - self.height() + 1 + int(4 * self.escala))   # a sombra do chão passa da borda
         if salvar:
             save_position(self.app.paths.panels, self.key, self.x(), self.y())
 
@@ -93,7 +109,7 @@ class Casinha(FloatingWidget):
     def paintEvent(self, _event):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
-        p.scale(TAMANHO, TAMANHO)
+        p.scale(self.escala, self.escala)
         agora = time.monotonic()
         casa = self.ctl.carteira.casa or "casinha"
         hora = time.localtime().tm_hour
@@ -424,7 +440,7 @@ class Casinha(FloatingWidget):
     def mouseReleaseEvent(self, event):
         clique = (self._apertou is not None and event.button() == Qt.LeftButton
                   and (event.position() - self._apertou).manhattanLength() < 5)
-        pos = event.position() / TAMANHO
+        pos = event.position() / self.escala
         self._apertou = None
         super().mouseReleaseEvent(event)
         self.encostar(salvar=True)
