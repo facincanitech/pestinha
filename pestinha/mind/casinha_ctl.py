@@ -57,6 +57,9 @@ class CasinhaController:
                 self.app.pet_state.at_desk = False
             mesa.escondido = sem_computador
             mesa._aplicar_visibilidade()
+        celular = getattr(self.app, "celular", None)
+        if celular is not None:
+            celular.setVisible(self.app.pet.isVisible() and self.carteira.eletronico == "mapple")
         if self.atividade == "tv" and not self.carteira.tem("tv"):
             self.atividade = "eletronico"
         if not self.carteira.casa and self.dentro:

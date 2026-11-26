@@ -53,6 +53,7 @@ from .body.bolinha import Ball, load_sprite
 from .body.brincadeira import Play
 from .body.desenho_rosto import aparencia_de
 from .world.desenho import Desenhista
+from .world.celular import Celular
 from .core.consciencia import Consciencia
 from .mind.consciencia_ctl import ConscienciaController
 from .mind.casinha_ctl import CasinhaController
@@ -201,6 +202,8 @@ class PestinhaApp(SessaoMixin, InteracaoMixin, QObject):
         self.aparelho = None
         self._ganhos = {"carinho": 0.0, "ligado": 0.0, "evento": 0.0, "rede": 0.0, "fala": 0.0}
         self.mischief.desenhista.recompensa = self.carteira.ganhar
+        self.celular = Celular(self, self.abrir_aparelho)     # o Mapple de costas na tela (antes do notebook)
+        self.mesa.caderno.abrir = self.abrir_aparelho           # clicar no notebook também abre a tela
         self.casinha_ctl = CasinhaController(self)
         self.personas = Personas(self, pet_def.get("personas"))
         paper = load_sprite(self.conteudo.bolinha_papel)
@@ -325,6 +328,7 @@ class PestinhaApp(SessaoMixin, InteracaoMixin, QObject):
         exclude = {int(self.pet.winId())} | {int(t.winId()) for t in self.mischief.things}
         exclude |= self.floats.visible_handles()
         exclude.add(int(self.casinha_ctl.casinha.winId()))
+        exclude.add(int(self.celular.winId()))
         exclude |= {int(w.winId()) for w in self.revolucao.janelas()}
         exclude |= {int(w.winId()) for w in self.protest_ctl.sign_windows()}
         exclude |= {int(w.winId()) for w in self.sad_ctl.sign_windows()}
@@ -568,13 +572,11 @@ class PestinhaApp(SessaoMixin, InteracaoMixin, QObject):
         self.paciencia.activateWindow()
 
     def abrir_aparelho(self):
-        from .ui.aparelho import Aparelho
+        """Abre a tela do celular Mapple (ou do notebook/PC gamer), com os apps."""
+        from .ui.tela_aparelho import TelaAparelho
         if self.aparelho is None:
-            self.aparelho = Aparelho(self)
-        self.aparelho.atualizar()
-        self.aparelho.show()
-        self.aparelho.raise_()
-        self.aparelho.activateWindow()
+            self.aparelho = TelaAparelho(self)
+        self.aparelho.mostrar()
 
     def frame(self):
         """Um quadro da tela: move o corpo pela física e atualiza a animação do pet."""

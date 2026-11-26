@@ -75,6 +75,8 @@ class SessaoMixin:
         if not self.perms["travessuras"] and self.mischief.things:
             self.clear_things()                      # travessuras desligadas: o que estava na tela sai
         self.mesa.set_visible(visible)
+        if hasattr(self, "celular"):
+            self.celular.setVisible(visible and self.carteira.eletronico == "mapple")
         self.castigo.set_visible(visible)
         if not visible:
             self.revolucao.esconder()

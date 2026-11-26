@@ -166,12 +166,14 @@ class Aparelho(QWidget):
     def _aba_jogos(self):
         w = QWidget()
         v = QVBoxLayout(w)
-        b = QPushButton("Paciência de associações (níveis, moedas e recompensa diária)")
+        b = QPushButton("Paciência de associações")
         b.setMinimumHeight(48)
         b.clicked.connect(self.app.abrir_paciencia)
         v.addWidget(b)
-        v.addWidget(QLabel("<b>Pedra, papel e tesoura</b><br>Ele aprende o seu jeito de jogar. "
-                           "Vitória sua: 12 moedas, empate: 5, derrota: 3."))
+        explica = QLabel("<b>Pedra, papel e tesoura</b><br>Ele aprende o seu jeito de jogar. "
+                         "Vitória sua: 12 moedas, empate: 5, derrota: 3.")
+        explica.setWordWrap(True)
+        v.addWidget(explica)
         h = QHBoxLayout()
         for j in JOGADAS:
             b = QPushButton(j.capitalize())

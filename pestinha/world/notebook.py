@@ -42,6 +42,8 @@ class Notebook(FloatingWidget):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.working = False
+        self.abrir = None            # o app liga: clicar (sem arrastar) abre a tela do notebook
+        self._apertou = None
 
     def set_working(self, working):
         """Acende a borda quando você está trabalhando (o pet sentado)."""
@@ -83,3 +85,18 @@ class Notebook(FloatingWidget):
         p.setBrush(prata)
         p.drawRoundedRect(base, 3, 3)
         p.end()
+
+    def mousePressEvent(self, event):
+        """Guarda onde apertou, para saber se foi clique ou arraste."""
+        if event.button() == Qt.LeftButton:
+            self._apertou = event.globalPosition()
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        """Clique sem arrastar abre a tela do notebook; arrastar só move."""
+        clique = (self._apertou is not None and event.button() == Qt.LeftButton
+                  and (event.globalPosition() - self._apertou).manhattanLength() < 5)
+        self._apertou = None
+        super().mouseReleaseEvent(event)
+        if clique and self.abrir:
+            self.abrir()

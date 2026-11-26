@@ -61,14 +61,21 @@ def test_aparelho_jogo_e_meme(monkeypatch):
     img.fill(QColor("#4fc3f7"))
     img.save(str(pasta / "livre_0001.png"))
     b.abrir_aparelho()
-    ap = b.aparelho
+    tela = b.aparelho
+    tela.grab().save("/tmp/celular_inicio.png")
+    b.celular.grab().save("/tmp/celular_costas.png")
+    tela.abrir_app("loja")
+    tela.grab().save("/tmp/celular_loja.png")
+    tela.inicio_()
+    ap = tela.apps
     antes = b.carteira.moedas
     for _ in range(12):
         ap._jogar("pedra")
     assert b.carteira.moedas > antes
     ap._criar_meme()
     assert ap.meme_atual is not None and ap.meme_atual.exists()
-    ap.grab().save("/tmp/aparelho.png")
+    tela.abrir_app("jogos")
+    tela.grab().save("/tmp/celular_jogos.png")
 
 
 def test_personas_trocam_conteudo_mas_nao_a_cor(monkeypatch):
