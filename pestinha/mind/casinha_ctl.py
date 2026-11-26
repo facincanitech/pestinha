@@ -21,7 +21,7 @@ from ..body.desenho_rosto import com_acessorio
 from ..log import log
 from ..world.casinha import Casinha
 
-CHAPEUS = ("chapeu_cowboy", "bone", "coroa")
+CHAPEUS = ("chapeu_cowboy", "bone", "coroa", "cartola", "gorro")
 PRAZO_ANDAR = 12.0          # s andando até a porta; depois disso ele "chega" de qualquer jeito
 CANSOU_S = 15 * 60          # entrou por ordem sua: sai sozinho depois disso
 

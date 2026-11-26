@@ -22,10 +22,10 @@ SCREEN = QColor("#171e19")
 EYE = QColor("#3ee877")
 SHINE = QColor("#c8ffd8")
 
-ACESSORIOS = ("oculos", "gravata", "chapeu_cowboy", "bone", "coroa")
+ACESSORIOS = ("oculos", "gravata", "chapeu_cowboy", "bone", "coroa", "cartola", "gorro")
 COR_HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 COR_PADRAO_ACESSORIO = {"oculos": "#e8e8e8", "gravata": "#b3261e", "chapeu_cowboy": "#9a5b2e", "bone": "#d32f2f",
-                        "coroa": "#f2c14e"}
+                        "coroa": "#f2c14e", "cartola": "#1b1b1f", "gorro": "#d32f2f"}
 
 
 @dataclass(frozen=True)
@@ -103,6 +103,10 @@ def draw_face(p, shape, gaze=(0.0, 0.0), blink=1.0, emotion="observando", carinh
             _bone(p, cor)
         elif nome == "coroa":
             _coroa(p, cor)
+        elif nome == "cartola":
+            _cartola(p, cor)
+        elif nome == "gorro":
+            _gorro(p, cor)
 
 
 def com_acessorio(aparencia, nome, ligado, cor=None):
@@ -133,6 +137,37 @@ def _bone(p, cor):
     p.drawPath(aba)
     p.setBrush(QColor("#ffffff"))
     p.drawEllipse(QPointF(-2, topo - 24), 3, 3)
+    p.restore()
+
+
+def _cartola(p, cor):
+    """Cartola de mágico, com fita."""
+    p.save()
+    topo = -BODY_H / 2
+    p.setPen(QPen(QColor("#000000"), 1.4))
+    p.setBrush(cor)
+    p.drawRoundedRect(QRectF(-26, topo - 50, 52, 50), 4, 4)
+    p.setBrush(QColor("#b71c1c"))
+    p.drawRect(QRectF(-26, topo - 14, 52, 8))
+    p.setBrush(cor)
+    p.drawRoundedRect(QRectF(-48, topo - 6, 96, 9), 4, 4)
+    p.restore()
+
+
+def _gorro(p, cor):
+    """Gorro com pompom caído para o lado."""
+    p.save()
+    topo = -BODY_H / 2
+    p.setPen(Qt.NoPen)
+    p.setBrush(cor)
+    gorro = QPainterPath(QPointF(-44, topo + 2))
+    gorro.cubicTo(-40, topo - 40, 30, topo - 50, 54, topo - 18)
+    gorro.lineTo(40, topo + 2)
+    gorro.closeSubpath()
+    p.drawPath(gorro)
+    p.setBrush(QColor("#ffffff"))
+    p.drawRoundedRect(QRectF(-48, topo - 6, 92, 12), 6, 6)
+    p.drawEllipse(QPointF(56, topo - 16), 9, 9)
     p.restore()
 
 

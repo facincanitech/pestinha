@@ -19,22 +19,47 @@ MOEDAS_INICIAIS = 50
 # id: (categoria, nome, preço, nível) - o nível ordena a evolução de casas e eletrônicos
 CATALOGO = {
     "papelao": ("casa", "Caixa de papelão", 60, 1),
-    "casinha": ("casa", "Casinha de madeira", 300, 2),
-    "casa": ("casa", "Casa de tijolo", 1200, 3),
+    "barraca": ("casa", "Barraca de camping", 150, 2),
+    "casinha": ("casa", "Casinha de madeira", 300, 3),
+    "praia": ("casa", "Casa de praia", 700, 4),
+    "casa": ("casa", "Casa de tijolo", 1200, 5),
+    "mansao": ("casa", "Mansão", 4000, 6),
     "mapple": ("eletronico", "Celular Mapple", 0, 1),
     "notebook": ("eletronico", "Notebook", 400, 2),
     "pc_gamer": ("eletronico", "PC gamer", 1500, 3),
-    "chapeu_cowboy": ("chapeu", "Chapéu de cowboy", 120, 0),
-    "bone": ("chapeu", "Boné", 80, 0),
-    "coroa": ("chapeu", "Coroa", 2000, 0),
+    "fliperama": ("videogame", "Fliperama", 350, 1),
+    "console_retro": ("videogame", "Console retrô", 500, 2),
+    "console": ("videogame", "Console de última geração", 900, 3),
     "cama": ("movel", "Caminha", 90, 0),
     "tv": ("movel", "TV", 250, 0),
+    "sofa": ("movel", "Sofá", 220, 0),
+    "poltrona": ("movel", "Poltrona", 130, 0),
+    "estante": ("movel", "Estante de livros", 160, 0),
+    "caixa_som": ("movel", "Caixa de som", 180, 0),
     "tapete": ("movel", "Tapete", 40, 0),
     "planta": ("movel", "Plantinha", 60, 0),
     "luminaria": ("movel", "Luminária", 70, 0),
+    "cortina_azul": ("cortina", "Cortina azul", 50, 0),
+    "cortina_vermelha": ("cortina", "Cortina vermelha", 50, 0),
+    "cortina_listrada": ("cortina", "Cortina listrada", 80, 0),
+    "cortina_estrelas": ("cortina", "Cortina de estrelas", 120, 0),
+    "bone": ("chapeu", "Boné", 80, 0),
+    "gorro": ("chapeu", "Gorro", 90, 0),
+    "chapeu_cowboy": ("chapeu", "Chapéu de cowboy", 120, 0),
+    "cartola": ("chapeu", "Cartola", 300, 0),
+    "coroa": ("chapeu", "Coroa", 2000, 0),
 }
-CATEGORIAS = {"casa": "Casas", "eletronico": "Eletrônicos", "chapeu": "Chapéus", "movel": "Móveis"}
-EQUIPAVEIS = ("casa", "eletronico", "chapeu")     # um de cada por vez; móveis ficam todos na casa
+FIGURAS = {
+    "papelao": "📦", "barraca": "⛺", "casinha": "🛖", "praia": "🏖️", "casa": "🏠", "mansao": "🏰",
+    "mapple": "📱", "notebook": "💻", "pc_gamer": "🖥️", "fliperama": "🕹️", "console_retro": "👾", "console": "🎮",
+    "cama": "🛏️", "tv": "📺", "sofa": "🛋️", "poltrona": "🪑", "estante": "📚", "caixa_som": "🔊", "tapete": "🟦",
+    "planta": "🪴", "luminaria": "💡", "cortina_azul": "🟦", "cortina_vermelha": "🟥", "cortina_listrada": "🎏",
+    "cortina_estrelas": "✨", "bone": "🧢", "gorro": "🎅", "chapeu_cowboy": "🤠", "cartola": "🎩", "coroa": "👑",
+}
+CATEGORIAS = {"casa": "Casas", "eletronico": "Eletrônicos", "videogame": "Videogames", "movel": "Móveis",
+              "cortina": "Cortinas", "chapeu": "Chapéus"}
+FIGURA_CATEGORIA = {"casa": "🏡", "eletronico": "💻", "videogame": "🎮", "movel": "🛋️", "cortina": "🪟", "chapeu": "🎩"}
+EQUIPAVEIS = ("casa", "eletronico", "chapeu", "cortina")     # um de cada por vez; o resto fica todo na casa
 
 
 def _inteiro(v, padrao=0):
@@ -96,8 +121,8 @@ class Carteira:
         cat = CATALOGO[item][0]
         if cat not in EQUIPAVEIS:
             return False
-        if cat == "chapeu" and self.equipado.get("chapeu") == item:
-            del self.equipado["chapeu"]          # clicar de novo tira o chapéu
+        if cat in ("chapeu", "cortina") and self.equipado.get(cat) == item:
+            del self.equipado[cat]               # clicar de novo tira o chapéu (ou a cortina)
         else:
             self.equipado[cat] = item
         self.salvar()
@@ -119,6 +144,10 @@ class Carteira:
     @property
     def chapeu(self):
         return self.equipado.get("chapeu")
+
+    @property
+    def cortina(self):
+        return self.equipado.get("cortina")
 
     def salvar(self):
         try:

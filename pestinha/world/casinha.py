@@ -100,15 +100,20 @@ class Casinha(FloatingWidget):
         noite = hora >= 19 or hora < 6
 
         p.setPen(Qt.NoPen)
-        p.setBrush(QColor(0, 0, 0, 50))
-        p.drawRect(QRectF(14, 56, W - 20, H - 58))
+        if casa != "barraca":
+            p.setBrush(QColor(0, 0, 0, 50))
+            p.drawRect(QRectF(14, 56, W - 20, H - 58))
         if casa == "papelao":
             self._caixa(p)
+        elif casa == "barraca":
+            self._barraca(p)
         else:
             self._paredes(p, casa)
             self._janela(p, noite)
+            self._cortina(p)
         chao = QRectF(10, H - 42, W - 20, 38)
-        p.setBrush(QColor("#c9a06b") if casa == "papelao" else QColor("#a8734a"))
+        p.setBrush(QColor({"papelao": "#c9a06b", "barraca": "#6aa84f", "praia": "#f1d9a6",
+                           "mansao": "#6d4c41"}.get(casa, "#a8734a")))
         p.drawRect(chao)
         p.setPen(QPen(QColor("#8d5d38"), 1))
         for x in range(20, W - 10, 34):
@@ -118,20 +123,24 @@ class Casinha(FloatingWidget):
         if self._tem("tapete"):
             p.setBrush(QColor("#5f8fd6"))
             p.drawEllipse(QRectF(120, H - 40, 100, 22))
-        if self._tem("planta"):
-            p.setBrush(QColor("#b5653b"))
-            p.drawRect(QRectF(96, 160, 16, 16))
-            p.setBrush(QColor("#43a047"))
-            for dx, dy in ((-6, -8), (6, -10), (0, -16), (-2, -4), (8, -2)):
-                p.drawEllipse(QPointF(104 + dx, 160 + dy), 7, 5)
+        if self._tem("estante") and casa not in ("papelao", "barraca"):
+            p.setBrush(QColor("#8d5b33"))
+            for y in (86, 104):
+                p.drawRect(QRectF(88, y, 48, 3))
+            cores = ["#e53935", "#1e88e5", "#43a047", "#fdd835", "#8e24aa", "#fb8c00"]
+            for k in range(6):
+                p.setBrush(QColor(cores[k]))
+                p.drawRect(QRectF(90 + k * 7, 74 + (k % 2) * 2, 5, 12 - (k % 2) * 2))
+                p.setBrush(QColor(cores[(k + 3) % 6]))
+                p.drawRect(QRectF(92 + k * 7, 92, 5, 12))
         if self._tem("luminaria"):
             p.setBrush(QColor("#6b6f75"))
-            p.drawRect(QRectF(132, 120, 3, 56))
+            p.drawRect(QRectF(130, 120, 3, 56))
             p.setBrush(QColor("#ffe082") if noite else QColor("#fff3cf"))
-            p.drawPolygon(QPolygonF([QPointF(124, 120), QPointF(143, 120), QPointF(139, 106), QPointF(128, 106)]))
+            p.drawPolygon(QPolygonF([QPointF(122, 120), QPointF(141, 120), QPointF(137, 106), QPointF(126, 106)]))
             if noite:
                 p.setBrush(QColor(255, 224, 130, 45))
-                p.drawEllipse(QPointF(133, 135), 34, 26)
+                p.drawEllipse(QPointF(131, 135), 34, 26)
 
         if self._tem("cama"):
             p.setBrush(QColor("#7a4b2a"))
@@ -145,9 +154,46 @@ class Casinha(FloatingWidget):
             p.setBrush(QColor("#9e9e9e"))                    # sem cama: dorme num paninho
             p.drawRoundedRect(QRectF(30, 168, 60, 9), 4, 4)
 
+        if self._tem("fliperama"):
+            p.setBrush(QColor("#283593"))
+            p.drawRoundedRect(QRectF(98, 116, 26, 62), 3, 3)
+            p.setBrush(QColor.fromHsv(int(agora * 80) % 360, 200, 255))
+            p.drawRect(QRectF(102, 122, 18, 14))
+            p.setBrush(QColor("#ff5252"))
+            p.drawEllipse(QPointF(106, 144), 2.5, 2.5)
+            p.setBrush(QColor("#ffeb3b"))
+            p.drawEllipse(QPointF(116, 144), 2.5, 2.5)
+        if self._tem("poltrona"):
+            p.setBrush(QColor("#6a1b9a"))
+            p.drawRoundedRect(QRectF(100, 154, 30, 24), 6, 6)
+            p.setBrush(QColor("#8e24aa"))
+            p.drawRoundedRect(QRectF(104, 162, 22, 10), 4, 4)
+
         if self._tem("tv"):
             self._tv(p, agora)
-        if casa != "papelao":
+            if self._tem("console") or self._tem("console_retro"):
+                p.setBrush(QColor("#eceff1") if self._tem("console") else QColor("#9e9e9e"))
+                p.drawRoundedRect(QRectF(174, 140, 24, 8), 2, 2)
+            if self._tem("caixa_som"):
+                p.setBrush(QColor("#263238"))
+                p.drawRoundedRect(QRectF(176, 78, 20, 13), 3, 3)
+                p.setBrush(QColor("#90a4ae"))
+                p.drawEllipse(QPointF(182, 84.5), 3, 3)
+                p.drawEllipse(QPointF(190, 84.5), 3, 3)
+        if self._tem("planta"):
+            p.setBrush(QColor("#b5653b"))
+            p.drawRect(QRectF(146, 80, 12, 12) if self._tem("tv") else QRectF(96, 160, 16, 16))
+            base = QPointF(152, 80) if self._tem("tv") else QPointF(104, 160)
+            p.setBrush(QColor("#43a047"))
+            for dx, dy in ((-6, -8), (6, -10), (0, -16), (-2, -4), (8, -2)):
+                p.drawEllipse(QPointF(base.x() + dx, base.y() + dy), 7, 5)
+        if self._tem("sofa"):
+            p.setBrush(QColor("#00897b"))
+            p.drawRoundedRect(QRectF(138, 158, 70, 22), 8, 8)
+            p.setBrush(QColor("#26a69a"))
+            p.drawRoundedRect(QRectF(144, 164, 58, 10), 5, 5)
+
+        if casa not in ("papelao", "barraca"):
             p.setBrush(QColor("#6d4325"))
             p.drawRoundedRect(PORTA, 4, 4)
             p.setBrush(QColor("#f2c14e"))
@@ -174,7 +220,8 @@ class Casinha(FloatingWidget):
         telhado.lineTo(W / 2, 4)
         telhado.lineTo(W - 2, 58)
         telhado.closeSubpath()
-        p.setBrush(QColor("#5d4037") if casa == "casa" else QColor("#b5523b"))
+        telha = {"casa": "#5d4037", "praia": "#00838f", "mansao": "#1a237e"}.get(casa, "#b5523b")
+        p.setBrush(QColor(telha))
         p.drawPath(telhado)
         p.setPen(QPen(QColor("#3e2723") if casa == "casa" else QColor("#8c3b28"), 2))
         for i in range(1, 4):
@@ -193,12 +240,74 @@ class Casinha(FloatingWidget):
             p.setPen(Qt.NoPen)
             p.setBrush(QColor(255, 240, 220, 120))
             p.drawRect(QRectF(14, 56, W - 28, H - 98))
+        elif casa == "mansao":
+            p.setBrush(QColor("#f5ecd7"))
+            p.drawRect(QRectF(10, 52, W - 20, H - 56))
+            p.setBrush(QColor("#ffd54f"))
+            p.drawRect(QRectF(10, 52, W - 20, 5))
+            p.setBrush(QColor("#e8dcc0"))
+            for x in (14, W - 26):
+                p.drawRect(QRectF(x, 57, 12, H - 99))
+            p.setBrush(QColor("#c5a14a"))
+            p.drawEllipse(QPointF(W / 2, 30), 8, 8)
+        elif casa == "praia":
+            p.setBrush(QColor("#d7f1f5"))
+            p.drawRect(QRectF(10, 52, W - 20, H - 56))
+            p.setBrush(QColor("#b2e3ec"))
+            for x in range(18, W - 18, 22):
+                p.drawRect(QRectF(x, 52, 4, H - 92))
         else:
             p.setBrush(QColor("#f3e2c7"))
             p.drawRect(QRectF(10, 52, W - 20, H - 56))
             p.setBrush(QColor("#ead2ad"))
             for x in range(18, W - 18, 22):
                 p.drawRect(QRectF(x, 52, 2, H - 92))
+
+    def _barraca(self, p):
+        """Barraca de camping, aberta na frente."""
+        lona = QPainterPath(QPointF(6, H - 40))
+        lona.lineTo(W / 2, 22)
+        lona.lineTo(W - 6, H - 40)
+        lona.closeSubpath()
+        p.setBrush(QColor("#ef6c00"))
+        p.drawPath(lona)
+        dentro = QPainterPath(QPointF(40, H - 40))
+        dentro.lineTo(W / 2, 46)
+        dentro.lineTo(W - 40, H - 40)
+        dentro.closeSubpath()
+        p.setBrush(QColor("#ffcc80"))
+        p.drawPath(dentro)
+        p.setPen(QPen(QColor("#6d4c41"), 3))
+        p.drawLine(QPointF(W / 2, 14), QPointF(W / 2, 24))
+        p.setPen(Qt.NoPen)
+
+    def _cortina(self, p):
+        """Cortina na janela (a equipada na loja)."""
+        qual = self.ctl.carteira.cortina
+        if not qual:
+            return
+        cor = {"cortina_azul": "#1e88e5", "cortina_vermelha": "#c62828", "cortina_listrada": "#ffffff",
+               "cortina_estrelas": "#283593"}.get(qual, "#1e88e5")
+        jan = QRectF(26, 70, 54, 40)
+        for lado in (0, 1):
+            x0 = jan.left() - 6 if lado == 0 else jan.right() - 12
+            pano = QPainterPath(QPointF(x0, jan.top() - 6))
+            pano.lineTo(x0 + 18, jan.top() - 6)
+            pano.quadTo(x0 + (4 if lado == 0 else 14), jan.center().y(), x0 + (8 if lado == 0 else 10), jan.bottom() + 6)
+            pano.lineTo(x0, jan.bottom() + 6)
+            pano.closeSubpath()
+            p.setBrush(QColor(cor))
+            p.drawPath(pano)
+            if qual == "cortina_listrada":
+                p.setBrush(QColor("#e53935"))
+                for k in range(0, 50, 10):
+                    p.drawRect(QRectF(x0, jan.top() - 6 + k, 18, 4))
+            elif qual == "cortina_estrelas":
+                p.setBrush(QColor("#ffeb3b"))
+                for k in range(3):
+                    p.drawEllipse(QPointF(x0 + 6 + (k % 2) * 6, jan.top() + 4 + k * 14), 1.8, 1.8)
+        p.setBrush(QColor("#6d4c41"))
+        p.drawRect(QRectF(jan.left() - 10, jan.top() - 9, jan.width() + 20, 4))
 
     def _janela(self, p, noite):
         jan = QRectF(26, 70, 54, 40)

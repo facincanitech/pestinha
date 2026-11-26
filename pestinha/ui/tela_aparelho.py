@@ -15,17 +15,18 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QStackedWidget, 
 
 from ..world.celular import desenhar_pera
 from .aparelho import Aparelho
+from .loja_app import LojaApp
 
 APPS = [  # (nome, figura, cor do ícone, ação)
-    ("Loja", "🛍️", "#ff7043", "loja"), ("Jogos", "🎮", "#7e57c2", "jogos"),
+    ("Loja", "🛍️", "#ff7043", "loja"), ("Jokenpô", "✊", "#7e57c2", "jogos"),
     ("Paciência", "🃏", "#2e7d32", "paciencia"), ("Rede", "👾", "#1e88e5", "rede"),
     ("Galeria", "🖼️", "#f9a825", "galeria"), ("Memes", "😂", "#ec407a", "rede"),
     ("Desenhar", "🎨", "#26a69a", "desenhar"), ("Casinha", "🏠", "#8d6e63", "casinha"),
     ("Ajustes", "⚙️", "#607d8b", "ajustes"),
 ]
-DOCK = ["Loja", "Jogos", "Rede", "Galeria"]
+DOCK = ["Loja", "Paciência", "Rede", "Galeria"]
 PAGINAS = {"loja": 0, "jogos": 1, "rede": 2, "galeria": 3}
-TITULOS = {"loja": "Loja", "jogos": "Jogos", "rede": "Rede dos pestinhas", "galeria": "Galeria"}
+TITULOS = {"loja": "Loja", "jogos": "Pedra, papel e tesoura", "rede": "Rede dos pestinhas", "galeria": "Galeria"}
 
 FORMATOS = {   # tamanho da janela e a área da tela dentro dela
     "mapple": ((360, 720), QRectF(14, 14, 332, 692), 40),
@@ -128,6 +129,8 @@ class TelaAparelho(QWidget):
         while self.apps.abas.count():
             paginas.append(self.apps.abas.widget(0))
             self.apps.abas.removeTab(0)
+        self.loja = LojaApp(app, ao_mudar=self._loja_mudou)
+        paginas[PAGINAS["loja"]] = self.loja                 # a loja do celular é o app novo, escuro
         self.pilha = QStackedWidget(self)
         self.inicio = Inicio(self)
         self.pilha.addWidget(self.inicio)
@@ -140,7 +143,7 @@ class TelaAparelho(QWidget):
             voltar = QPushButton("‹")
             voltar.setObjectName("voltar")
             voltar.setFixedSize(40, 34)
-            voltar.clicked.connect(self.inicio_)
+            voltar.clicked.connect(self.voltar)
             topo.addWidget(voltar)
             titulo = QLabel()
             titulo.setObjectName("tituloApp")
@@ -173,19 +176,35 @@ class TelaAparelho(QWidget):
         self.pilha.setGeometry(tela.toRect())
         self.barra.setGeometry(0, 0, w, h)
         self.barra.raise_()
-        escuro = self.formato == "pc_gamer"
-        fundo, texto = ("#121318", "#eeeeee") if escuro else ("#f5f5f7", "#1d1d1f")
+        fundo, texto = "#12131a", "#e8e9f0"          # tudo escuro, nada de tela branca
         self.pilha.setStyleSheet(f"""
             QWidget {{ color: {texto}; font-size: 13px; }}
             QStackedWidget > QWidget {{ background: {fundo}; border-radius: {self.raio}px; }}
+            QLabel {{ background: transparent; }}
             QLabel#tituloApp {{ font-size: 18px; font-weight: bold; }}
-            QPushButton {{ border: 1px solid #c7c7cc; border-radius: 10px; padding: 6px 10px; background: transparent; }}
-            QPushButton#voltar {{ font-size: 24px; border: 0; padding: 0; color: #0a84ff; }}
-            QPushButton:disabled {{ color: #9e9e9e; }}
+            QPushButton {{ border: 1px solid #3a3d4d; border-radius: 12px; padding: 8px 10px;
+                          background: #1e2130; color: #e8e9f0; font-weight: bold; }}
+            QPushButton:hover {{ background: #272b3d; }}
+            QPushButton:disabled {{ color: #6b6f82; }}
+            QPushButton#voltar {{ font-size: 26px; border: 0; padding: 0; background: transparent; color: #ffc83d; }}
+            QLineEdit, QListWidget, QScrollArea {{ background: #1b1d27; border: 1px solid #2c2f3d;
+                                                  border-radius: 10px; color: {texto}; padding: 4px; }}
+            QScrollArea > QWidget > QWidget {{ background: #1b1d27; }}
+            QCheckBox {{ background: transparent; }}
         """)
         self.inicio.setStyleSheet("background: transparent;")
 
     # ---------------- navegação ----------------
+
+    def voltar(self):
+        if self.pilha.currentWidget() is self.paginas[PAGINAS["loja"]] and self.loja.voltar():
+            self._loja_mudou()
+            return
+        self.inicio_()
+
+    def _loja_mudou(self):
+        self.paginas[PAGINAS["loja"]].titulo.setText(self.loja.titulo)
+        self.barra.update()
 
     def inicio_(self):
         self.pilha.setCurrentWidget(self.inicio)
@@ -196,7 +215,7 @@ class TelaAparelho(QWidget):
         a = self.app
         if acao in PAGINAS:
             moldura = self.paginas[PAGINAS[acao]]
-            moldura.titulo.setText(TITULOS[acao])
+            moldura.titulo.setText(self.loja.titulo if acao == "loja" else TITULOS[acao])
             self.apps.atualizar()
             self.pilha.setCurrentWidget(moldura)
         elif acao == "paciencia":
@@ -259,7 +278,7 @@ class TelaAparelho(QWidget):
 
     def _barra_de_status(self, p):
         a, r = self.area, self.area
-        cor = QColor("#ffffff") if self.pilha.currentWidget() is self.inicio or self.formato == "pc_gamer" else QColor("#1d1d1f")
+        cor = QColor("#ffffff")
         p.setPen(cor)
         p.setFont(QFont("Segoe UI", 11, QFont.Bold))
         p.drawText(QRectF(a.left() + 26, a.top() + 8, 80, 20), Qt.AlignLeft, datetime.now().strftime("%H:%M"))
