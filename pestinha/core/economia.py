@@ -18,12 +18,8 @@ MOEDAS_INICIAIS = 50
 
 # id: (categoria, nome, preço, nível) - o nível ordena a evolução de casas e eletrônicos
 CATALOGO = {
-    "papelao": ("casa", "Caixa de papelão", 60, 1),
-    "barraca": ("casa", "Barraca de camping", 150, 2),
-    "casinha": ("casa", "Casinha de madeira", 300, 3),
-    "praia": ("casa", "Casa de praia", 700, 4),
-    "casa": ("casa", "Casa de tijolo", 1200, 5),
-    "mansao": ("casa", "Mansão", 4000, 6),
+    "barraca": ("casa", "Barraca de camping", 150, 1),
+    "casinha": ("casa", "Quarto", 400, 2),
     "mapple": ("eletronico", "Celular Mapple", 0, 1),
     "notebook": ("eletronico", "Notebook", 400, 2),
     "pc_gamer": ("eletronico", "PC gamer", 1500, 3),
@@ -50,7 +46,7 @@ CATALOGO = {
     "coroa": ("chapeu", "Coroa", 2000, 0),
 }
 FIGURAS = {
-    "papelao": "📦", "barraca": "⛺", "casinha": "🛖", "praia": "🏖️", "casa": "🏠", "mansao": "🏰",
+    "barraca": "⛺", "casinha": "🛏️",
     "mapple": "📱", "notebook": "💻", "pc_gamer": "🖥️", "fliperama": "🕹️", "console_retro": "👾", "console": "🎮",
     "cama": "🛏️", "tv": "📺", "sofa": "🛋️", "poltrona": "🪑", "estante": "📚", "caixa_som": "🔊", "tapete": "🟦",
     "planta": "🪴", "luminaria": "💡", "cortina_azul": "🟦", "cortina_vermelha": "🟥", "cortina_listrada": "🎏",
@@ -60,6 +56,20 @@ CATEGORIAS = {"casa": "Casas", "eletronico": "Eletrônicos", "videogame": "Video
               "cortina": "Cortinas", "chapeu": "Chapéus"}
 FIGURA_CATEGORIA = {"casa": "🏡", "eletronico": "💻", "videogame": "🎮", "movel": "🛋️", "cortina": "🪟", "chapeu": "🎩"}
 EQUIPAVEIS = ("casa", "eletronico", "chapeu", "cortina")     # um de cada por vez; o resto fica todo na casa
+ANTIGOS = {"papelao": "barraca", "praia": "casinha", "casa": "casinha", "mansao": "casinha"}   # casas que saíram
+
+# Decorar: cores e estilos do quarto (mudar custa ESTILO_PRECO moedas)
+ESTILO_PRECO = 10
+ESTILOS = {
+    "parede": ("Parede", ["#f3e2c7", "#d7f1f5", "#f8d7e3", "#dfe8c9", "#e3dcf5", "#3b3f4a"]),
+    "parede_estilo": ("Estilo da parede", ["liso", "listrado", "tijolinho", "madeira"]),
+    "chao": ("Chão", ["#a8734a", "#7b5233", "#c9a06b", "#8d8d8d", "#5d7a99", "#3e2f2a"]),
+    "chao_estilo": ("Estilo do chão", ["tábuas", "quadriculado", "carpete"]),
+    "cama": ("Cama", ["#e55b5b", "#5c8ee5", "#5bbf7a", "#f2b84b", "#a66be0", "#333333"]),
+    "sofa": ("Sofá", ["#00897b", "#c62828", "#3949ab", "#6d4c41", "#ef6c00", "#424242"]),
+    "tapete": ("Tapete", ["#5f8fd6", "#e57373", "#81c784", "#ffd54f", "#ba68c8", "#90a4ae"]),
+}
+ESTILO_PADRAO = {k: v[1][0] for k, v in ESTILOS.items()}
 
 
 def _inteiro(v, padrao=0):
@@ -75,8 +85,13 @@ class Carteira:
         self.moedas = _inteiro(d.get("moedas"), MOEDAS_INICIAIS if novo else 0)
         self.ganho_total = _inteiro(d.get("ganho_total"), self.moedas)
         itens = d.get("itens") if isinstance(d.get("itens"), list) else []
+        itens = [ANTIGOS.get(i, i) for i in itens if isinstance(i, str)]
         self.itens = {i for i in itens if i in CATALOGO} | {"mapple"}
         eq = d.get("equipado") if isinstance(d.get("equipado"), dict) else {}
+        eq = {c: ANTIGOS.get(i, i) for c, i in eq.items() if isinstance(i, str)}
+        est = d.get("estilo") if isinstance(d.get("estilo"), dict) else {}
+        self.estilo = dict(ESTILO_PADRAO)
+        self.estilo.update({k: v for k, v in est.items() if k in ESTILOS and v in ESTILOS[k][1]})
         self.equipado = {c: i for c, i in eq.items() if c in EQUIPAVEIS and i in self.itens
                          and CATALOGO[i][0] == c}
         self.equipado.setdefault("eletronico", "mapple")
@@ -128,6 +143,17 @@ class Carteira:
         self.salvar()
         return True
 
+    def mudar_estilo(self, chave, valor):
+        """Troca uma cor ou estilo do quarto. Custa ESTILO_PRECO moedas. Devolve True se trocou."""
+        if chave not in ESTILOS or valor not in ESTILOS[chave][1] or self.estilo.get(chave) == valor:
+            return False
+        if self.moedas < ESTILO_PRECO:
+            return False
+        self.moedas -= ESTILO_PRECO
+        self.estilo[chave] = valor
+        self.salvar()
+        return True
+
     def tem(self, item):
         return item in self.itens
 
@@ -152,7 +178,7 @@ class Carteira:
     def salvar(self):
         try:
             write_json(self.caminho, {"moedas": self.moedas, "ganho_total": self.ganho_total,
-                                      "itens": sorted(self.itens), "equipado": self.equipado,
+                                      "itens": sorted(self.itens), "equipado": self.equipado, "estilo": self.estilo,
                                       "extrato": self.extrato})
         except OSError:
             pass

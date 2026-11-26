@@ -17,8 +17,7 @@ from ..body.desenho_rosto import draw_face, draw_zzz
 from .arrastavel import FloatingWidget, save_position
 
 W, H = 300, 220                 # tamanho do desenho; a janela é isso vezes a escala da casa
-TAMANHO = 0.62                  # escala da casinha de madeira (as outras casas crescem ou encolhem a partir dela)
-ESCALA_DA_CASA = {"papelao": 0.42, "barraca": 0.52, "casinha": 0.62, "praia": 0.72, "casa": 0.82, "mansao": 0.96}
+TAMANHO = 0.62
 ESCALA_PET = 0.36
 PORTA = QRectF(254, 128, 30, 62)          # na parede da direita
 LUGARES = {                                # onde ele fica em cada atividade (centro do corpo)
@@ -60,18 +59,7 @@ class Casinha(FloatingWidget):
         return self.x() + PORTA.center().x() * self.escala, self.y() + PORTA.bottom() * self.escala
 
     def ajustar_tamanho(self):
-        """A casa cresce na tela conforme a melhoria: caixa de papelão pequenininha, mansão grandona."""
-        escala = ESCALA_DA_CASA.get(self.ctl.carteira.casa or "casinha", TAMANHO)
-        if abs(escala - self.escala) < 1e-6 and self.width() == int(W * escala):
-            return
-        direita = self.x() + self.width()                 # cresce para a esquerda se encostar na borda
-        self.escala = escala
-        self.setMinimumSize(1, 1)
-        self.setFixedSize(int(W * escala), int(H * escala))
-        tela = QGuiApplication.screenAt(self.geometry().center()) or QGuiApplication.primaryScreen()
-        if direita > tela.availableGeometry().right():
-            self.move(tela.availableGeometry().right() - self.width(), self.y())
-        self.encostar(salvar=True)
+        """Tamanho fixo (a barraca e o quarto usam o mesmo espaço)."""
 
     def encostar(self, salvar=False):
         """Fica sempre em pé em cima da barra de tarefas (o fundo da área útil da tela em que está)."""
@@ -128,16 +116,11 @@ class Casinha(FloatingWidget):
             self._janela(p, noite)
             self._cortina(p)
         chao = QRectF(10, H - 42, W - 20, 38)
-        p.setBrush(QColor({"papelao": "#c9a06b", "barraca": "#6aa84f", "praia": "#f1d9a6",
-                           "mansao": "#6d4c41"}.get(casa, "#a8734a")))
-        p.drawRect(chao)
-        p.setPen(QPen(QColor("#8d5d38"), 1))
-        for x in range(20, W - 10, 34):
-            p.drawLine(QPointF(x, chao.top()), QPointF(x, chao.bottom()))
-        p.setPen(Qt.NoPen)
+        self._chao(p, chao, casa)
 
+        est = self.ctl.carteira.estilo
         if self._tem("tapete"):
-            p.setBrush(QColor("#5f8fd6"))
+            p.setBrush(QColor(est["tapete"]))
             p.drawEllipse(QRectF(120, H - 40, 100, 22))
         if self._tem("estante") and casa not in ("papelao", "barraca"):
             p.setBrush(QColor("#8d5b33"))
@@ -164,7 +147,7 @@ class Casinha(FloatingWidget):
             p.drawRect(QRectF(22, 128, 8, 48))
             p.setBrush(QColor("#ffffff"))
             p.drawRoundedRect(QRectF(32, 140, 24, 12), 5, 5)
-            p.setBrush(QColor("#e55b5b"))
+            p.setBrush(QColor(est["cama"]))
             p.drawRoundedRect(QRectF(54, 142, 42, 14), 4, 4)
         else:
             p.setBrush(QColor("#9e9e9e"))                    # sem cama: dorme num paninho
@@ -204,9 +187,9 @@ class Casinha(FloatingWidget):
             for dx, dy in ((-6, -8), (6, -10), (0, -16), (-2, -4), (8, -2)):
                 p.drawEllipse(QPointF(base.x() + dx, base.y() + dy), 7, 5)
         if self._tem("sofa"):
-            p.setBrush(QColor("#00897b"))
+            p.setBrush(QColor(est["sofa"]))
             p.drawRoundedRect(QRectF(138, 158, 70, 22), 8, 8)
-            p.setBrush(QColor("#26a69a"))
+            p.setBrush(QColor(est["sofa"]).lighter(125))
             p.drawRoundedRect(QRectF(144, 164, 58, 10), 5, 5)
 
         if casa not in ("papelao", "barraca"):
@@ -236,48 +219,65 @@ class Casinha(FloatingWidget):
         telhado.lineTo(W / 2, 4)
         telhado.lineTo(W - 2, 58)
         telhado.closeSubpath()
-        telha = {"casa": "#5d4037", "praia": "#00838f", "mansao": "#1a237e"}.get(casa, "#b5523b")
+        telha = "#b5523b"
         p.setBrush(QColor(telha))
         p.drawPath(telhado)
-        p.setPen(QPen(QColor("#3e2723") if casa == "casa" else QColor("#8c3b28"), 2))
+        p.setPen(QPen(QColor("#8c3b28"), 2))
         for i in range(1, 4):
             y = 4 + i * 13
             meia = (y - 4) / 54 * (W / 2 - 2)
             p.drawLine(QPointF(W / 2 - meia, y), QPointF(W / 2 + meia, y))
         p.setPen(Qt.NoPen)
-        if casa == "casa":
-            p.setBrush(QColor("#c8745a"))
-            p.drawRect(QRectF(10, 52, W - 20, H - 56))
-            p.setPen(QPen(QColor("#a85a43"), 1))
-            for row, y in enumerate(range(56, H - 42, 10)):
+        est = self.ctl.carteira.estilo
+        parede = QColor(est["parede"])
+        p.setBrush(parede)
+        p.drawRect(QRectF(10, 52, W - 20, H - 56))
+        estilo = est["parede_estilo"]
+        p.setBrush(parede.darker(110))
+        p.setPen(Qt.NoPen)
+        if estilo == "listrado":
+            for x in range(18, W - 18, 22):
+                p.drawRect(QRectF(x, 52, 8, H - 92))
+        elif estilo == "tijolinho":
+            p.setPen(QPen(parede.darker(118), 1))
+            for linha, y in enumerate(range(56, H - 42, 10)):
                 p.drawLine(QPointF(10, y), QPointF(W - 10, y))
-                for x in range(10 + (row % 2) * 12, W - 10, 24):
+                for x in range(10 + (linha % 2) * 12, W - 10, 24):
                     p.drawLine(QPointF(x, y), QPointF(x, y + 10))
             p.setPen(Qt.NoPen)
-            p.setBrush(QColor(255, 240, 220, 120))
-            p.drawRect(QRectF(14, 56, W - 28, H - 98))
-        elif casa == "mansao":
-            p.setBrush(QColor("#f5ecd7"))
-            p.drawRect(QRectF(10, 52, W - 20, H - 56))
-            p.setBrush(QColor("#ffd54f"))
-            p.drawRect(QRectF(10, 52, W - 20, 5))
-            p.setBrush(QColor("#e8dcc0"))
-            for x in (14, W - 26):
-                p.drawRect(QRectF(x, 57, 12, H - 99))
-            p.setBrush(QColor("#c5a14a"))
-            p.drawEllipse(QPointF(W / 2, 30), 8, 8)
-        elif casa == "praia":
-            p.setBrush(QColor("#d7f1f5"))
-            p.drawRect(QRectF(10, 52, W - 20, H - 56))
-            p.setBrush(QColor("#b2e3ec"))
-            for x in range(18, W - 18, 22):
-                p.drawRect(QRectF(x, 52, 4, H - 92))
+        elif estilo == "madeira":
+            for x in range(10, W - 10, 14):
+                p.drawRect(QRectF(x, 52, 1.5, H - 92))
         else:
-            p.setBrush(QColor("#f3e2c7"))
-            p.drawRect(QRectF(10, 52, W - 20, H - 56))
-            p.setBrush(QColor("#ead2ad"))
-            for x in range(18, W - 18, 22):
-                p.drawRect(QRectF(x, 52, 2, H - 92))
+            p.setBrush(parede.lighter(104))
+            p.drawRect(QRectF(10, H - 54, W - 20, 12))          # rodapé
+
+    def _chao(self, p, chao, casa):
+        if casa == "barraca":
+            p.setBrush(QColor("#6aa84f"))
+            p.drawRect(chao)
+            return
+        est = self.ctl.carteira.estilo
+        cor = QColor(est["chao"])
+        p.setBrush(cor)
+        p.drawRect(chao)
+        estilo = est["chao_estilo"]
+        if estilo == "quadriculado":
+            p.setBrush(cor.lighter(130))
+            lado = 12
+            for i, x in enumerate(range(int(chao.left()), int(chao.right()), lado)):
+                for j, y in enumerate(range(int(chao.top()), int(chao.bottom()), lado)):
+                    if (i + j) % 2 == 0:
+                        p.drawRect(QRectF(x, y, lado, lado).intersected(chao))
+        elif estilo == "carpete":
+            p.setBrush(cor.lighter(112))
+            for k in range(0, int(chao.width()), 6):
+                p.drawEllipse(QPointF(chao.left() + k + 3, chao.top() + 6 + (k % 18)), 1.2, 1.2)
+        else:
+            p.setPen(QPen(cor.darker(125), 1))
+            for x in range(20, W - 10, 34):
+                p.drawLine(QPointF(x, chao.top()), QPointF(x, chao.bottom()))
+            p.setPen(Qt.NoPen)
 
     def _barraca(self, p):
         """Barraca de camping, aberta na frente."""

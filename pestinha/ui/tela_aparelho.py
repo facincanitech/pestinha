@@ -15,6 +15,7 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QStackedWidget, 
 
 from ..world.celular import desenhar_pera
 from .aparelho import Aparelho
+from .decorar_app import DecorarApp
 from .loja_app import LojaApp
 
 APPS = [  # (nome, figura, cor do ícone, ação)
@@ -22,11 +23,13 @@ APPS = [  # (nome, figura, cor do ícone, ação)
     ("Paciência", "🃏", "#2e7d32", "paciencia"), ("Rede", "👾", "#1e88e5", "rede"),
     ("Galeria", "🖼️", "#f9a825", "galeria"), ("Memes", "😂", "#ec407a", "rede"),
     ("Desenhar", "🎨", "#26a69a", "desenhar"), ("Casinha", "🏠", "#8d6e63", "casinha"),
+    ("Decorar", "🖌️", "#5c6bc0", "decorar"),
     ("Ajustes", "⚙️", "#607d8b", "ajustes"),
 ]
 DOCK = ["Loja", "Paciência", "Rede", "Galeria"]
-PAGINAS = {"loja": 0, "jogos": 1, "rede": 2, "galeria": 3}
-TITULOS = {"loja": "Loja", "jogos": "Pedra, papel e tesoura", "rede": "Rede dos pestinhas", "galeria": "Galeria"}
+PAGINAS = {"loja": 0, "jogos": 1, "rede": 2, "galeria": 3, "decorar": 4}
+TITULOS = {"loja": "Loja", "jogos": "Pedra, papel e tesoura", "rede": "Rede dos pestinhas", "galeria": "Galeria",
+           "decorar": "Decorar o quarto"}
 
 FORMATOS = {   # tamanho da janela e a área da tela dentro dela
     "mapple": ((360, 720), QRectF(14, 14, 332, 692), 40),
@@ -131,6 +134,8 @@ class TelaAparelho(QWidget):
             self.apps.abas.removeTab(0)
         self.loja = LojaApp(app, ao_mudar=self._loja_mudou)
         paginas[PAGINAS["loja"]] = self.loja                 # a loja do celular é o app novo, escuro
+        self.decorar = DecorarApp(app)
+        paginas.append(self.decorar)
         self.pilha = QStackedWidget(self)
         self.inicio = Inicio(self)
         self.pilha.addWidget(self.inicio)
