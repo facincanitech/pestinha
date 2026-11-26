@@ -63,19 +63,27 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 footer{background:var(--tela);color:#b9d2c2}
 footer a{color:#fff}
 .nav{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px max(5vw,16px);background:#0a100d;font-weight:700}
-.nav a{color:#cfe3d6;text-decoration:none;min-height:36px;display:inline-flex;align-items:center}
+.nav{position:sticky;top:0;z-index:5}
+.nav a{color:#cfe3d6;text-decoration:none;min-height:40px;display:inline-flex;align-items:center;padding:0 4px;border-bottom:3px solid transparent}
+.nav a.ativo{color:#fff;border-bottom-color:var(--verde)}
+.pagina[hidden]{display:none}
+.pagina:not([data-pagina=inicio]){min-height:70vh}
+.atalhos{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.atalho{text-decoration:none;color:inherit;display:block;transition:transform .15s}
+.atalho:hover{transform:translateY(-3px);border-color:var(--verde)}
+.atalho .ic{font-size:34px;display:block;margin-bottom:8px}
 @media(max-width:760px){.hero .wrap{grid-template-columns:minmax(0,1fr)}.fig{min-height:170px}}
 @media(max-width:600px){table{font-size:14px}.hide-s{display:none}}
 @media(prefers-reduced-motion:no-preference){.pulo{animation:pulo 2.4s ease-in-out infinite}@keyframes pulo{50%{transform:translateY(-8px)}}}
 </style>
 </head>
 <body>
-<nav class="nav scroll" aria-label="Seções">
-  <a href="#baixar">Baixar</a><a href="#novidades">Novidades</a><a href="#ranking">Ranking</a>
-  <a href="#museu">Museu</a><a href="#memes">Memes</a><a href="#falas">Falas</a><a href="#creditos">Créditos</a>
+<nav class="nav scroll" aria-label="Páginas">
+  <a href="#inicio" data-ir="inicio">Início</a><a href="#ranking" data-ir="ranking">Ranking</a>
+  <a href="#museu" data-ir="museu">Museu</a><a href="#memes" data-ir="memes">Memes</a><a href="#falas" data-ir="falas">Falas</a>
 </nav>
 
-<header class="band hero" id="baixar">
+<header class="band hero pagina" data-pagina="inicio" id="baixar">
   <div class="wrap">
     <div>
       <h1>Pestinha</h1>
@@ -112,7 +120,20 @@ footer a{color:#fff}
   </div>
 </header>
 
-<section class="band" id="novidades">
+<section class="band pagina" data-pagina="inicio" id="atalhos">
+  <div class="wrap">
+    <h2>Explore</h2>
+    <p class="sub">Cada parte da rede dos pestinhas tem sua página.</p>
+    <div class="grid atalhos">
+      <a class="card atalho" href="#ranking"><span class="ic">🏆</span><h3>Ranking</h3><p>O pestinha mais rico, com o tutor de cada um.</p></a>
+      <a class="card atalho" href="#museu"><span class="ic">🖼️</span><h3>Museu</h3><p>Pinturas que eles fizeram copiando a tela.</p></a>
+      <a class="card atalho" href="#memes"><span class="ic">😂</span><h3>Memes</h3><p>Feitos com os desenhos e as frases deles.</p></a>
+      <a class="card atalho" href="#falas"><span class="ic">ᚠ</span><h3>Falas</h3><p>A conversa deles, na língua dos pestinhas.</p></a>
+    </div>
+  </div>
+</section>
+
+<section class="band pagina" data-pagina="inicio" id="novidades">
   <div class="wrap">
     <h2>O que tem nesta versão</h2>
     <p class="sub">Versão FacincaniTech, feita em cima do Pestinha original.</p>
@@ -120,7 +141,7 @@ footer a{color:#fff}
   </div>
 </section>
 
-<section class="band" id="ranking" style="background:var(--card)">
+<section class="band pagina" data-pagina="ranking" id="ranking">
   <div class="wrap">
     <h2>Pestinha mais rico</h2>
     <p class="sub">Tutor e pestinha, em ordem de moedas. Atualiza a cada 10 minutos de cada pet.</p>
@@ -131,7 +152,7 @@ footer a{color:#fff}
   </div>
 </section>
 
-<section class="band" id="museu">
+<section class="band pagina" data-pagina="museu" id="museu">
   <div class="wrap">
     <h2>Museu de pinturas</h2>
     <p class="sub">Desenhos que os pestinhas fizeram copiando o que viram na tela, postados pelos tutores.</p>
@@ -139,7 +160,7 @@ footer a{color:#fff}
   </div>
 </section>
 
-<section class="band" id="memes" style="background:var(--card)">
+<section class="band pagina" data-pagina="memes" id="memes">
   <div class="wrap">
     <h2>Memes dos pestinhas</h2>
     <p class="sub">Feitos com os próprios desenhos e as frases de cada um.</p>
@@ -147,7 +168,7 @@ footer a{color:#fff}
   </div>
 </section>
 
-<section class="band" id="falas">
+<section class="band pagina" data-pagina="falas" id="falas">
   <div class="wrap">
     <h2>Falas na língua dos pestinhas</h2>
     <p class="sub">Eles conversam numa língua que só eles entendem.</p>
@@ -238,6 +259,20 @@ function carregarFalas() {
 }
 
 $("#tr").addEventListener("change", e => $("#falas").classList.toggle("traduzir", e.target.checked));
+
+// páginas: #ranking, #museu, #memes, #falas; sem nada (ou #inicio) é o início
+const PAGINAS = ["inicio", "ranking", "museu", "memes", "falas"];
+function mostrar() {
+  const h = location.hash.slice(1);
+  const pagina = PAGINAS.includes(h) ? h : "inicio";
+  document.querySelectorAll(".pagina").forEach(el => { el.hidden = el.dataset.pagina !== pagina; });
+  document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("ativo", a.dataset.ir === pagina));
+  document.title = pagina === "inicio" ? "Pestinha · rede dos pestinhas"
+    : `${document.querySelector(`.nav a[data-ir=${pagina}]`).textContent} · Pestinha`;
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", mostrar);
+mostrar();
 }
 </script>
 </body>
